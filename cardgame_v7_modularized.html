@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Card Game • Modularized</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>Card Game Starter</h1>
+    <p class="sub">
+      Ranked Advantage Order: <strong>Attorney/Lawyer &gt; Badge &gt; Faction &gt; Ticket</strong>.
+      Badge still trumps Jail Time, Blockade Order, Blacklist Notice. Targeted Life and Economy cards ignore the PvP toggle.
+      SCORE resets by round; BANK persists.
+    </p>
+
+    <div class="row" role="application" aria-label="Two player card game">
+      <div>
+        <div class="panel p1" aria-labelledby="playerAHeader">
+          <header id="playerAHeader">Player A</header>
+          <div class="body pwrap">
+            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreA" class="v">0</span> · BANK: <span id="bankA" class="v">0</span></div>
+            <div class="controls player-controls">
+              <button id="drawA">Draw 1</button>
+              <button id="toggleDiscardA">Discard Mode</button>
+            </div>
+            <div id="hand1" class="cards" aria-label="Player A hand"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel" aria-labelledby="setupHeader">
+          <header id="setupHeader">Setup</header>
+          <div class="body">
+            <div class="controls">
+              <label for="mode">Theme:</label>
+              <select id="mode" aria-label="Theme">
+                <option value="realistic">Realistic</option>
+                <option value="fantasy">Fantasy</option>
+              </select>
+              <button id="makeDeck" aria-label="Build deck">Build Deck</button>
+              <button id="shuffle" class="primary" disabled aria-disabled="true">Shuffle</button>
+              <button id="deal" disabled aria-disabled="true">Deal 8 Each</button>
+              <label class="inline" for="autoReset"><input type="checkbox" id="autoReset" checked />Auto reset SCORE on Next Round</label>
+              <button id="nextRound" disabled aria-disabled="true">Next Round</button>
+              <button id="resetScores" disabled aria-disabled="true">Reset Scores</button>
+            </div>
+
+            <div class="controls">
+              <label for="rngMode">Randomizer:</label>
+              <select id="rngMode" aria-label="Randomizer mode">
+                <option value="off">Off</option>
+                <option value="die-tie">Die d6 (tiebreaker)</option>
+                <option value="die-always">Die d6 (always, no type advantage)</option>
+                <option value="rps-tie">R/P/S (tiebreaker)</option>
+                <option value="rps-always">R/P/S (always, no type advantage)</option>
+              </select>
+              <label class="inline" for="seedInput">
+                Seed:
+                <input id="seedInput" type="text" placeholder="Optional seed" size="12" aria-label="Optional seed for reproducible randomness" />
+              </label>
+              <button id="applySeed">Apply Seed</button>
+            </div>
+<!-- Art controls -->
+<div class="controls">
+  <label for="svgTheme">SVG Theme:</label>
+  <select id="svgTheme" aria-label="SVG art theme">
+    <option value="realistic">Realistic</option>
+    <option value="fantasy">Fantasy</option>
+  </select>
+
+  <label for="imagePack" style="margin-left:8px;">Image Pack:</label>
+  <select id="imagePack" aria-label="Image pack">
+    <option value="none">None (SVG only)</option>
+    <option value="noir">Noir</option>
+    <option value="watercolor">Watercolor</option>
+    <option value="neon">Neon</option>
+  </select>
+
+  <label class="inline" for="preferImages" style="margin-left:8px;">
+    <input type="checkbox" id="preferImages" />
+    Prefer images if available
+  </label>
+</div>
+
+<div class="controls">
+  <!-- Existing selects for svgTheme, imagePack, preferImages, and Apply Art (Rebuild) -->
+  <button id="applyArt" title="Apply art settings by rebuilding the deck">Apply Art (Rebuild)</button>
+
+  <!-- New: non-destructive re-skin -->
+  <button id="reskinArt" title="Refresh art on existing cards without changing game state">Re-skin in Place</button>
+</div>
+
+            <div class="controls">
+              <label class="inline" for="pvpEffects"><input type="checkbox" id="pvpEffects" checked> PvP effects on generic Life/Economy (invert positives)</label>
+            </div>
+
+            <div class="controls">
+              <label for="playTo">Play to SCORE:</label>
+              <select id="playTo" aria-label="Play to SCORE">
+                <option value="none">No target</option>
+                <optgroup label="Positive targets">
+                  <option value="8">8</option>
+                  <option value="10">10</option>
+                  <option value="15">15</option>
+                  <option value="20">20</option>
+                  <option value="25">25</option>
+                </optgroup>
+                <optgroup label="Negative targets">
+                  <option value="-10">-10</option>
+                  <option value="-15">-15</option>
+                  <option value="-25">-25</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="controls">
+              <label for="bankAction">Spend BANK:</label>
+              <select id="bankAction" aria-label="Spend BANK action"></select>
+              <button id="spendBank" disabled aria-disabled="true">Spend (Current Player)</button>
+            </div>
+
+            <div class="turn" id="turnIndicator" aria-live="polite">Not dealt.</div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <header>Deck and Discard</header>
+          <div class="body cols">
+            <div class="stack">
+              <h3>Deck (top on left)</h3>
+              <div id="deck" class="cards" aria-label="Deck"></div>
+            </div>
+            <div class="stack">
+              <h3>Discard</h3>
+              <div id="discard" class="cards" aria-label="Discard"></div>
+            </div>
+            <div class="stack">
+              <h3>Battlefield</h3>
+              <div class="battlefield">
+                <div id="bf1" aria-label="Battlefield A"></div>
+                <div id="bf2" aria-label="Battlefield B"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <header>Log</header>
+          <div class="body">
+            <div class="sr-only" aria-live="assertive" id="liveAnnouncer"></div>
+            <div id="log" class="log" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel p2" aria-labelledby="playerBHeader">
+          <header id="playerBHeader">Player B</header>
+          <div class="body pwrap">
+            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreB" class="v">0</span> · BANK: <span id="bankB" class="v">0</span></div>
+            <div class="controls player-controls">
+              <button id="drawB">Draw 1</button>
+              <button id="toggleDiscardB">Discard Mode</button>
+            </div>
+            <div id="hand2" class="cards" aria-label="Player B hand"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="roundModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="roundModalTitle" aria-describedby="roundModalBody">
+    <div class="modal-card">
+      <h3 id="roundModalTitle">Round Result</h3>
+      <p id="roundModalBody">Placeholder</p>
+      <div class="modal-actions">
+        <button id="closeRoundModal" class="primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

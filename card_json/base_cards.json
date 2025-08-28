@@ -1,0 +1,33 @@
+[
+  {"name":"Public Defender","type":"Attorney","power":5},
+  {"name":"Defense Attorney","type":"Attorney","power":6},
+  {"name":"Civil Rights Lawyer","type":"Attorney","power":7},
+
+  {"name":"Street Collective","type":"Faction","power":5},
+  {"name":"Dockside Crew","type":"Faction","power":4},
+  {"name":"Market Syndicate","type":"Faction","power":6},
+  {"name":"Rooftop Runners","type":"Faction","power":3},
+  {"name":"Breaker Unit","type":"Faction","power":7},
+  {"name":"Night Circle","type":"Faction","power":5},
+  {"name":"Iron Band","type":"Faction","power":8},
+  {"name":"Shadow Choir","type":"Faction","power":6},
+  {"name":"Canal Watch","type":"Faction","power":4},
+  {"name":"Signal Knot","type":"Faction","power":7},
+
+  {"name":"City Inspector","type":"Badge","power":5},
+  {"name":"Marshal's Seal","type":"Badge","power":6},
+  {"name":"Audit Dossier","type":"Badge","power":4},
+  {"name":"Informant File","type":"Badge","power":3},
+  {"name":"Blockade Order","type":"Badge","power":7},
+  {"name":"Warrant Stamp","type":"Badge","power":6},
+  {"name":"Detain Protocol","type":"Badge","power":5},
+  {"name":"Blacklist Notice","type":"Badge","power":4},
+
+  {"name":"Tariff Slip","type":"Ticket","power":3},
+  {"name":"Summons Form","type":"Ticket","power":5},
+  {"name":"Levy Bill","type":"Ticket","power":6},
+  {"name":"Closure Citation","type":"Ticket","power":7},
+  {"name":"Access Permit","type":"Ticket","power":4},
+  {"name":"Fine Receipt","type":"Ticket","power":5},
+  {"name":"Redline Notice","type":"Ticket","power":6}
+]
