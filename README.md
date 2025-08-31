@@ -11,7 +11,5 @@ Another caveat is that ChatGPT does a lot of the generation and based off the ma
 
 In it's simplest form, I and the card game are trying to convey an idea in an interactive way.
 
-Will most likely have CORS issue - I used nodes server to test
-
 [https://chatgpt.com/share/68aef260-e274-800c-b7cb-753ef2b744f4](https://chatgpt.com/share/68aef260-e274-800c-b7cb-753ef2b744f4)
 # KindaReal_CardGame_Modularized
