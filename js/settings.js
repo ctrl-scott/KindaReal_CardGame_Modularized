@@ -1,5 +1,5 @@
 // js/settings.js
-const KEY = 'cardgame_art_settings_v1';
+const KEY = 'cardgame_art_settings_v7';
 
 const DEFAULTS = {
   svgTheme: 'realistic',   // 'realistic' | 'fantasy'
