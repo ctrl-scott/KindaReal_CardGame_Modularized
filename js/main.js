@@ -1,20 +1,27 @@
 // js/main.js
+
+// -------------------- Imports (must be first) --------------------
 import { players, deck, discard, bf, drewThisTurn, discardMode, resetAll } from './state.js';
 import { buildDeck } from './loader.js';
 import { artForCard, makeArtContext, resolveArt } from './art.js';
 import { shuffleInPlace, compareWithRandomizers, BANK_ACTIONS } from './gameplay.js';
 import {
-  log, renderAll, renderHand, renderStack, updateScoreboard,
-  setTurnText, updateTurnControls, showRoundAlert, closeRoundAlert, cardHTML
+  log,
+  renderAll,
+  renderHand,
+  renderStack,
+  updateScoreboard,
+  setTurnText,
+  updateTurnControls,
+  showRoundAlert,
+  closeRoundAlert,
+  cardHTML
 } from './ui.js';
 import { applySeed } from './rng.js';
-
-// Settings
 import { loadSettings, saveSettings, readSettingsFromDOM, writeSettingsToDOM } from './settings.js';
 
-
-
 // -------------------- Globals (UI helpers) --------------------
+window.cardHTML = cardHTML;          // expose for battlefield renderers
 window.__turn = null;
 window.__discardMode = discardMode;
 window.__handlers = {};
@@ -188,27 +195,44 @@ function playCard(playerIdx, handIndex) {
   updateScoreboard(); renderHand(0); renderHand(1); renderStack('discard', discard);
 }
 
-// Expose handlers for UI bindings elsewhere if needed
+// -------------------- Expose handlers for UI --------------------
 window.__handlers.playCard = playCard;
 window.__handlers.discardCard = function (playerIdx, handIndex) {
   const card = players[playerIdx].hand.splice(handIndex, 1)[0];
-  discard.push(card); log(`Discard: Player ${playerIdx === 0 ? 'A' : 'B'} discarded ${card.name}.`);
-  discardMode[playerIdx] = false; renderHand(playerIdx); renderStack('discard', discard); updateTurnControls();
+  discard.push(card);
+  log(`Discard: Player ${playerIdx === 0 ? 'A' : 'B'} discarded ${card.name}.`);
+  discardMode[playerIdx] = false;
+  renderHand(playerIdx);
+  renderStack('discard', discard);
+  updateTurnControls();
   window.__turn = 1 - playerIdx; drewThisTurn[window.__turn] = false; setTurnText();
-  if (players[0].hand.length === 0 && players[1].hand.length === 0) { const msg = summarizeRoundAndEnd(); showRoundAlert(msg); }
+  if (players[0].hand.length === 0 && players[1].hand.length === 0) {
+    const msg = summarizeRoundAndEnd(); showRoundAlert(msg);
+  }
 };
 
 // -------------------- Bank Actions & Dealing --------------------
 function populateBankActions(actions) {
   const sel = document.getElementById('bankAction'); if (!sel) return;
   sel.innerHTML = '';
-  actions.forEach(a => { const o = document.createElement('option'); o.value = a.key; o.textContent = a.name; sel.appendChild(o); });
+  actions.forEach(a => {
+    const o = document.createElement('option');
+    o.value = a.key;
+    o.textContent = a.name;
+    sel.appendChild(o);
+  });
 }
 function dealEightEach() {
   if (deck.length < 16) { log('Not enough cards to deal.'); return; }
   players[0].hand = []; players[1].hand = [];
-  for (let i = 0; i < 16; i++) { const card = deck.shift(); players[i % 2].hand.push(card); }
-  bf[0] = bf[1] = null; window.__turn = 0; drewThisTurn[0] = drewThisTurn[1] = false; discardMode[0] = discardMode[1] = false;
+  for (let i = 0; i < 16; i++) {
+    const card = deck.shift();
+    players[i % 2].hand.push(card);
+  }
+  bf[0] = bf[1] = null;
+  window.__turn = 0;
+  drewThisTurn[0] = drewThisTurn[1] = false;
+  discardMode[0] = discardMode[1] = false;
   setTurnText();
   document.getElementById('nextRound').disabled = false;
   document.getElementById('resetScores').disabled = false;
@@ -264,7 +288,7 @@ async function buildWithCurrentSettings() {
   enable(spendBtn, false);
 }
 
-// Non-destructive re-skin: recompute art for existing cards across all piles
+// Non-destructive re-skin
 function reskinArtInPlace() {
   const s = readSettingsFromDOM();
   saveSettings(s);
@@ -272,10 +296,9 @@ function reskinArtInPlace() {
 
   const retag = (card) => {
     if (!card) return;
-    // Deterministic: use card.id as stableKey so bg arrays don't flip each click
     const { html, meta } = resolveArt(card, ctx, card.id);
     card.art = html;
-    card.__artMeta = meta; // optional for debugging
+    card.__artMeta = meta;
   };
 
   deck.forEach(retag);
@@ -285,10 +308,8 @@ function reskinArtInPlace() {
   if (bf[0]) retag(bf[0]);
   if (bf[1]) retag(bf[1]);
 
-  // Re-render
   renderAll();
 
-  // Battlefield areas might not be fully re-rendered by renderAll() if your UI separates them:
   const bf1 = document.getElementById('bf1'), bf2 = document.getElementById('bf2');
   if (bf1 && bf[0]) { bf1.innerHTML = ''; const el = document.createElement('div'); el.className = 'card'; el.innerHTML = cardHTML(bf[0]); bf1.appendChild(el); }
   if (bf2 && bf[1]) { bf2.innerHTML = ''; const el = document.createElement('div'); el.className = 'card'; el.innerHTML = cardHTML(bf[1]); bf2.appendChild(el); }
@@ -296,8 +317,8 @@ function reskinArtInPlace() {
   log(`Re-skinned in place (svgTheme=${s.svgTheme}, imagePack=${s.imagePack}, preferImages=${s.preferImages}). State preserved.`);
 }
 
-// Handlers
-makeBtn.addEventListener('click', async () => {
+// -------------------- Event listeners --------------------
+makeBtn?.addEventListener('click', async () => {
   try { await buildWithCurrentSettings(); }
   catch (e) { log(String(e)); }
 });
@@ -307,11 +328,15 @@ applyArtBtn?.addEventListener('click', async () => {
 });
 reskinBtn?.addEventListener('click', () => { reskinArtInPlace(); });
 
-shuffleBtn.addEventListener('click', () => { shuffleInPlace(deck); renderAll(); log('Deck shuffled.'); enable(dealBtn, true); });
-dealBtn.addEventListener('click', () => { if (window.__turn !== null) { log('A hand is already active.'); return; } dealEightEach(); log(`Dealt 8 each. Player A has ${players[0].hand.length}. Player B has ${players[1].hand.length}. Player A starts.`); });
-nextRoundBtn.addEventListener('click', () => { nextRound(); });
-resetScoresBtn.addEventListener('click', () => { resetScores(); });
-spendBtn.addEventListener('click', () => {
+shuffleBtn?.addEventListener('click', () => { shuffleInPlace(deck); renderAll(); log('Deck shuffled.'); enable(dealBtn, true); });
+dealBtn?.addEventListener('click', () => {
+  if (window.__turn !== null) { log('A hand is already active.'); return; }
+  dealEightEach();
+  log(`Dealt 8 each. Player A has ${players[0].hand.length}. Player B has ${players[1].hand.length}. Player A starts.`);
+});
+nextRoundBtn?.addEventListener('click', () => { nextRound(); });
+resetScoresBtn?.addEventListener('click', () => { resetScores(); });
+spendBtn?.addEventListener('click', () => {
   if (window.__turn === null) { log('No active turn.'); return; }
   const key = document.getElementById('bankAction').value;
   const action = BANK_ACTIONS.find(a => a.key === key);
@@ -323,26 +348,24 @@ spendBtn.addEventListener('click', () => {
   log(`Player ${p === 0 ? 'A' : 'B'} spent ${action.cost} BANK to ${action.name}.`);
   updateScoreboard();
 });
-seedBtn.addEventListener('click', () => { const seed = document.getElementById('seedInput').value.trim(); applySeed(seed, log); });
-drawA.addEventListener('click', () => drawOneIfMyTurn(0));
-drawB.addEventListener('click', () => drawOneIfMyTurn(1));
-discA.addEventListener('click', () => toggleDiscardMode(0));
-discB.addEventListener('click', () => toggleDiscardMode(1));
-closeModalBtn.addEventListener('click', closeRoundAlert);
-document.getElementById('roundModal').addEventListener('click', (e) => { if (e.target.id === 'roundModal') closeRoundAlert(); });
+seedBtn?.addEventListener('click', () => {
+  const seed = document.getElementById('seedInput')?.value.trim();
+  applySeed(seed, log);
+});
+drawA?.addEventListener('click', () => drawOneIfMyTurn(0));
+drawB?.addEventListener('click', () => drawOneIfMyTurn(1));
+discA?.addEventListener('click', () => toggleDiscardMode(0));
+discB?.addEventListener('click', () => toggleDiscardMode(1));
+closeModalBtn?.addEventListener('click', closeRoundAlert);
+document.getElementById('roundModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'roundModal') closeRoundAlert();
+});
 
 // -------------------- Single DOM Ready Init --------------------
 window.addEventListener('DOMContentLoaded', () => {
-  // Load saved settings into the UI controls
   const s = loadSettings();
   writeSettingsToDOM(s);
-
-  // Populate BANK action select
   populateBankActions(BANK_ACTIONS);
-
   // Kick off initial build using current settings
   makeBtn?.click();
 });
-
-// Expose for battlefield use in other modules
-window.cardHTML = cardHTML;
