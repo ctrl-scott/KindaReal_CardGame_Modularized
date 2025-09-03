@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Card Game • Modularized</title>
   <link rel="stylesheet" href="css/styles.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+ <!--> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">-->
 </head>
 <body>
   <div class="wrap">
@@ -30,6 +30,21 @@
           </div>
         </div>
       </div>
+	      <div>
+	        <div class="panel p2" aria-labelledby="playerBHeader">
+	          <header id="playerBHeader">Player B</header>
+	          <div class="body pwrap">
+	            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreB" class="v">0</span> · BANK: <span id="bankB" class="v">0</span></div>
+	            <div class="controls player-controls">
+	              <button id="drawB">Draw 1</button>
+	              <button id="toggleDiscardB">Discard Mode</button>
+	            </div>
+	            <div id="hand2" class="cards" aria-label="Player B hand"></div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
 
       <div>
         <div class="panel" aria-labelledby="setupHeader">
@@ -157,7 +172,7 @@
         </div>
       </div>
 
-      <div>
+ <!--     <div>
         <div class="panel p2" aria-labelledby="playerBHeader">
           <header id="playerBHeader">Player B</header>
           <div class="body pwrap">
@@ -171,7 +186,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </div>-->
 
   <div id="roundModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="roundModalTitle" aria-describedby="roundModalBody">
     <div class="modal-card">

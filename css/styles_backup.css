@@ -267,58 +267,45 @@ label.inline{
 .modal-card p{ margin:0 0 14px; color:var(--muted); }
 .modal-actions{ display:flex; justify-content:flex-end; gap:8px; }
 
-/* === Top-row pinning via grid areas (prevents Player B from dropping) === */
-.row{
-  display: grid;
-  grid-template-columns: 1fr 500px 1fr;
-  grid-template-areas:
-    "playerA setup playerB"
-    ".       deck  ."
-    ".       log   .";
-  gap: 18px;
-  grid-auto-flow: row dense;
-}
+/* ===== Pin the three top panels into columns ===== */
+.row{ grid-auto-flow: row dense; }             /* help the grid pack items predictably */
 
-/* Map panels to grid areas */
-.panel.p1      { grid-area: playerA; }  /* Player A (left)    */
-.panel.setup   { grid-area: setup; }    /* Setup (center)     */
-.panel.p2      { grid-area: playerB; }  /* Player B (right)   */
+/* Use whatever selectors your HTML exposes.
+   These work if your left/right panels have .p1 and .p2 on them,
+   and the setup panel has .setup (common in your markup). */
+.panel.p1{ grid-column: 1; grid-row: 1; }      /* Player A (left)   */
+.panel.setup{ grid-column: 2; grid-row: 1; }   /* Setup (center)    */
+.panel.p2{ grid-column: 3; grid-row: 1; }      /* Player B (right)  */
 
-/* Center strip panels */
-.panel.deck,
-.panel.deckpanel { grid-area: deck; }   /* supports either class */
-.panel.logpanel  { grid-area: log; }
+/* Make the “Deck and Discard” panel take the full width on the next row */
+.panel.deck{ grid-column: 1 / -1; grid-row: 2; }
 
-/* Masonry cascade only for the deck panel (if you’re using .deckpanel) */
+/* (Optional) If your log is its own panel and should be full width under deck: */
+.panel.logpanel{ grid-column: 1 / -1; }
+
+/* Masonry-style cascade for the center panel */
 .deckpanel .cards{
-  display: block;
-  column-count: 2;
-  column-gap: 16px;
-  padding-bottom: 4px;
+  /* turn off the default flex wrap for this panel only */
+  display:block;
+  column-count:2;          /* try 3 if you have room */
+  column-gap:16px;
+  padding-bottom:4px;
 }
 .deckpanel .card{
-  width: auto;
-/*  display: inline-block; */
-  break-inside: avoid;
-  margin: 0 0 12px;
+  width:auto;              /* full column width */
+  display:inline-block;    /* needed inside columns */
+  break-inside:avoid;      /* prevent card splits */
+  margin:0 0 12px;         /* vertical spacing between cards */
 }
 
-/* Keep side panels normal flex layout */
+/* Keep side panels normal (they still use flex) */
 .p1 .cards, .p2 .cards{ display:flex; flex-wrap:wrap; gap:10px; }
 
-/* Responsive: collapse to one column under 1100px */
+/* Optional: at narrow widths, fall back to a single column */
 @media (max-width:1100px){
-  .row{
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "playerA"
-      "setup"
-      "playerB"
-      "deck"
-      "log";
-  }
-  .deckpanel .cards{ column-count: 1; }
+  .deckpanel .cards{ column-count:1; }
 }
+
 
 /* =========================
    Motion preferences
