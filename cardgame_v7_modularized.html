@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Card Game • Modularized</title>
   <link rel="stylesheet" href="css/styles.css" />
- <!--> <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">-->
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 <body>
   <div class="wrap">
@@ -15,37 +15,6 @@
       Badge still trumps Jail Time, Blockade Order, Blacklist Notice. Targeted Life and Economy cards ignore the PvP toggle.
       SCORE resets by round; BANK persists.
     </p>
-
-    <div class="row" role="application" aria-label="Two player card game">
-      <div>
-        <div class="panel p1" aria-labelledby="playerAHeader">
-          <header id="playerAHeader">Player A</header>
-          <div class="body pwrap">
-            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreA" class="v">0</span> · BANK: <span id="bankA" class="v">0</span></div>
-            <div class="controls player-controls">
-              <button id="drawA">Draw 1</button>
-              <button id="toggleDiscardA">Discard Mode</button>
-            </div>
-            <div id="hand1" class="cards" aria-label="Player A hand"></div>
-          </div>
-        </div>
-      </div>
-	      <div>
-	        <div class="panel p2" aria-labelledby="playerBHeader">
-	          <header id="playerBHeader">Player B</header>
-	          <div class="body pwrap">
-	            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreB" class="v">0</span> · BANK: <span id="bankB" class="v">0</span></div>
-	            <div class="controls player-controls">
-	              <button id="drawB">Draw 1</button>
-	              <button id="toggleDiscardB">Discard Mode</button>
-	            </div>
-	            <div id="hand2" class="cards" aria-label="Player B hand"></div>
-	          </div>
-	        </div>
-	      </div>
-	    </div>
-	  </div>
-
       <div>
         <div class="panel" aria-labelledby="setupHeader">
           <header id="setupHeader">Setup</header>
@@ -141,6 +110,37 @@
             <div class="turn" id="turnIndicator" aria-live="polite">Not dealt.</div>
           </div>
         </div>
+    <div class="row" role="application" aria-label="Two player card game">
+      <div>
+        <div class="panel p1" aria-labelledby="playerAHeader">
+          <header id="playerAHeader">Player A</header>
+          <div class="body pwrap">
+            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreA" class="v">0</span> · BANK: <span id="bankA" class="v">0</span></div>
+            <div class="controls player-controls">
+              <button id="drawA">Draw 1</button>
+              <button id="toggleDiscardA">Discard Mode</button>
+            </div>
+            <div id="hand1" class="cards" aria-label="Player A hand"></div>
+          </div>
+        </div>
+      </div>
+	      <div>
+	        <div class="panel p2" aria-labelledby="playerBHeader">
+	          <header id="playerBHeader">Player B</header>
+	          <div class="body pwrap">
+	            <div class="scoreline" aria-live="polite">SCORE: <span id="scoreB" class="v">0</span> · BANK: <span id="bankB" class="v">0</span></div>
+	            <div class="controls player-controls">
+	              <button id="drawB">Draw 1</button>
+	              <button id="toggleDiscardB">Discard Mode</button>
+	            </div>
+	            <div id="hand2" class="cards" aria-label="Player B hand"></div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+
+ 
 
         <div class="panel deckpanel" style="margin-top:16px">
           <header>Deck and Discard</header>
