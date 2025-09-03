@@ -1,8 +1,8 @@
 [
-  {"name":"Identity Theft","bankMod":3,"copies":2,"target":"opponent"},
-  {"name":"Fraud Loss","bankMod":2,"copies":2,"target":"opponent"},
-  {"name":"Car Repair Bill","bankMod":2,"copies":2,"target":"opponent"},
-  {"name":"Medical Bill","bankMod":3,"copies":1,"target":"opponent"},
-  {"name":"Payday Loan Fees","bankMod":2,"copies":2,"target":"opponent"},
-  {"name":"Rent Increase","bankMod":1,"copies":2,"target":"opponent"}
+  {"name":"Identity Theft","bankMod":3,"copies":2,"target":"opponent","bg": "./img/default_econoppo.png"},
+  {"name":"Fraud Loss","bankMod":2,"copies":2,"target":"opponent","bg": "./img/default_econoppo.png"},
+  {"name":"Car Repair Bill","bankMod":2,"copies":2,"target":"opponent","bg": "./img/default_econoppo.png"},
+  {"name":"Medical Bill","bankMod":3,"copies":1,"target":"opponent","bg": "./img/default_econoppo.png"},
+  {"name":"Payday Loan Fees","bankMod":2,"copies":2,"target":"opponent","bg": "./img/default_econoppo.png"},
+  {"name":"Rent Increase","bankMod":1,"copies":2,"target":"opponent","bg": "./img/default_econoppo.png"}
 ]

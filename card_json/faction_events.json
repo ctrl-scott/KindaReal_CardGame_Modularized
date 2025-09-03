@@ -1,10 +1,10 @@
 [
-  {"name":"Faction Information Gathering (Self)","scoreMod":2,"copies":2,"target":"self"},
-  {"name":"Faction Information Gathering (Opponent)","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Faction Hostility (Self)","scoreMod":2,"copies":2,"target":"self"},
-  {"name":"Faction Hostility (Opponent)","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Faction Negotiations (Self)","scoreMod":2,"copies":2,"target":"self"},
-  {"name":"Faction Negotiations (Opponent)","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Faction Payroll","bankMod":1,"copies":2,"target":"self"},
-  {"name":"Faction Payoff","bankMod":1,"copies":2,"target":"opponent"}
+  {"name":"Faction Information Gathering (Self)","scoreMod":2,"copies":2,"target":"self","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Information Gathering (Opponent)","scoreMod":-2,"copies":2,"target":"opponent","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Hostility (Self)","scoreMod":2,"copies":2,"target":"self","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Hostility (Opponent)","scoreMod":-2,"copies":2,"target":"opponent","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Negotiations (Self)","scoreMod":2,"copies":2,"target":"self","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Negotiations (Opponent)","scoreMod":-2,"copies":2,"target":"opponent","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Payroll","bankMod":1,"copies":2,"target":"self","bg": "./img/default_peoplebg.png"},
+  {"name":"Faction Payoff","bankMod":1,"copies":2,"target":"opponent","bg": "./img/default_peoplebg.png"}
 ]
