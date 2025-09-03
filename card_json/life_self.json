@@ -1,15 +1,96 @@
 [
-  {"name":"Therapy Session","scoreMod":2,"copies":2,"target":"self","bg":"img/therapy.png"},
-  {"name":"Support Group","scoreMod":2,"copies":2,"target":"self","bg":"img/support_group.png"},
-  {"name":"Exercise Routine","scoreMod":1,"copies":3,"target":"self","bg":"img/exercise.png"},
-  {"name":"Sleep Hygiene","scoreMod":1,"copies":2,"target":"self","bg":"img/sleep.png"},
-  {"name":"Mindfulness Practice","scoreMod":1,"copies":3,"target":"self","bg":"img/mindfulness.png"},
-  {"name":"New Skill Course","scoreMod":2,"copies":2,"target":"self","bg":"img/skill_course.png"},
-  {"name":"Stable Housing","scoreMod":2,"copies":1,"target":"self","bg":"img/housing.png"},
-  {"name":"Financial Counseling","scoreMod":1,"copies":2,"target":"self","bg":"img/financial_counseling.png"},
-  {"name":"Healthy Diet","scoreMod":1,"copies":2,"target":"self","bg":"img/USA_playing_card.png"},
-  {"name":"Disclosure (Exculpatory)","scoreMod":2,"copies":2,"target":"self","bg":"img/disclosure_exculpatory.png"},
-  {"name":"Constitutional Amendments (Protected Right)","scoreMod":2,"copies":2,"target":"self","bg":"img/protected_right.png"},
-  {"name":"Read Book","scoreMod":2,"copies":2,"target":"self","bg":"img/book_cover.png"}
-  
+  {
+    "name": "Therapy Session",
+    "scoreMod": 2,
+    "copies": 2,
+    "target": "self",
+    "bg": "./img/default_selfhelp.png"
+  },
+  {
+    "name": "Support Group",
+    "scoreMod": 2,
+    "copies": 2,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Exercise Routine",
+    "scoreMod": 1,
+    "copies": 3,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Sleep Hygiene",
+    "scoreMod": 1,
+    "copies": 2,
+    "target": "self",
+    "bg": "./img/default_selfhelp.png"
+  },
+  {
+    "name": "Mindfulness Practice",
+    "scoreMod": 1,
+    "copies": 3,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "New Skill Course",
+    "scoreMod": 2,
+    "copies": 2,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Stable Housing",
+    "scoreMod": 2,
+    "copies": 1,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Financial Counseling",
+    "scoreMod": 1,
+    "copies": 2,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Healthy Diet",
+    "scoreMod": 1,
+    "copies": 2,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Disclosure (Exculpatory)",
+    "scoreMod": 2,
+    "copies": 2,
+    "target": "self",
+    "bg": "img/default_selfhelp.png"
+  },
+  {
+    "name": "Constitutional Amendments (Protected Right)",
+    "scoreMod": 2,
+    "copies": 2,
+    "target": "self",
+    "bg": "default_selfhelp.png"
+  },
+  {
+    "name": "Read Book",
+    "scoreMod": 2,
+    "copies": 2,
+    "target": "self",
+    "bg": "./img/default_selfhelp.png"
+  },
+  {
+    "name": "Gay Conversion Therapy",
+    "type": "LifeEvent",
+    "target": "opponent",
+    "power": 6,
+    "scoreMod": -2,
+    "bankMod": -3,
+    "bg": "./default_bg_image.png",
+    "copies": 2
+  }
 ]

@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Card Game Starter • 25‑Card Deck</title>
+  <style>
+    :root{
+      --bg:#ffffff; --ink:#111318; --muted:#5b6270; --border:#e7e8ee;
+      --surface:#f7f7fb; --accent:#00c853; --p1:#3b82f6; --p2:#ef4444;
+      --radius:16px; --shadow:0 10px 30px rgba(17,19,24,.10);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font:16px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; color:var(--ink); background:var(--surface)}
+    .wrap{max-width:1100px; margin:auto; padding:24px}
+    h1{font-size:24px; margin:0 0 8px}
+    .sub{color:var(--muted); margin:0 0 20px}
+    .row{display:grid; grid-template-columns: 320px 1fr; gap:18px}
+    .panel{background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)}
+    .panel header{padding:10px 14px; border-bottom:1px solid var(--border); font-weight:700}
+    .panel .body{padding:12px 14px}
+    .controls{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+    button{appearance:none; border:1px solid var(--border); border-radius:12px; padding:10px 14px; background:#fff; cursor:pointer; font-weight:600}
+    button.primary{background:var(--accent); color:#fff; border-color:transparent}
+    button:disabled{opacity:.55; cursor:not-allowed}
+    select{padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff}
+
+    /* Layout columns */
+    .cols{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px}
+    .stack{min-height:160px}
+    .stack h3{font-size:14px; color:var(--muted); margin:0 0 6px}
+    .cards{display:flex; flex-wrap:wrap; gap:10px}
+
+    /* Card visuals */
+    .card{width:120px; aspect-ratio: 2/3; background:#fff; border:1.5px solid var(--border); border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,.06); overflow:hidden; display:flex; flex-direction:column}
+    .card .art{flex:1; border-bottom:1px solid var(--border); display:grid; place-items:center; position:relative}
+    .card .meta{padding:8px 10px}
+    .card .name{font-size:14px; font-weight:700; line-height:1.25}
+    .card .tags{font-size:11px; color:var(--muted)}
+    .badge{background:#fff; border:1px dashed var(--border); color:var(--muted); font-size:13px; padding:4px 8px; border-radius:8px}
+
+    /* Player areas */
+    .pwrap{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .pbox{border:1px solid var(--border); border-radius:12px; padding:10px}
+    .pbox h4{margin:0 0 6px; font-size:14px}
+    .p1 .pbox h4{color:var(--p1)}
+    .p2 .pbox h4{color:var(--p2)}
+
+    .battlefield{display:grid; grid-template-columns:1fr 1fr; gap:16px; padding-top:8px}
+    .log{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:13px; color:#2b2f36; max-height:220px; overflow:auto; white-space:pre-wrap}
+
+    @media (max-width:900px){
+      .row{grid-template-columns:1fr}
+      .cols{grid-template-columns:1fr}
+      .card{width:104px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Card Game Starter</h1>
+    <p class="sub">A minimal two player prototype. Deck size is 25. Card Types: Faction (people), Badge (authority), Ticket (paper). Mode toggles the art theme only.</p>
+
+    <div class="row">
+      <div class="panel">
+        <header>Setup</header>
+        <div class="body">
+          <div class="controls">
+            <label for="mode">Theme:&nbsp;</label>
+            <select id="mode">
+              <option value="realistic">Realistic</option>
+              <option value="fantasy">Fantasy</option>
+            </select>
+            <button id="makeDeck">Build Deck</button>
+            <button id="shuffle" class="primary" disabled>Shuffle</button>
+            <button id="deal" disabled>Deal To Two Players</button>
+            <button id="playRound" disabled>Play Round</button>
+            <button id="reset">Reset</button>
+          </div>
+          <div class="badge">Advantage Matrix: Badge defeats Faction; Ticket defeats Badge; Faction defeats Ticket. If same type, the higher Power wins. Power ties push to Discard.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <header>Deck and Discard</header>
+        <div class="body cols">
+          <div class="stack">
+            <h3>Deck (top on left)</h3>
+            <div id="deck" class="cards"></div>
+          </div>
+          <div class="stack">
+            <h3>Discard</h3>
+            <div id="discard" class="cards"></div>
+          </div>
+          <div class="stack">
+            <h3>Battlefield</h3>
+            <div class="battlefield">
+              <div id="bf1"></div>
+              <div id="bf2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <header>Players</header>
+      <div class="body pwrap">
+        <div class="pbox p1">
+          <h4>Player A</h4>
+          <div id="hand1" class="cards"></div>
+        </div>
+        <div class="pbox p2">
+          <h4>Player B</h4>
+          <div id="hand2" class="cards"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <header>Log</header>
+      <div class="body">
+        <div id="log" class="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // No contractions are used in strings or comments.
+
+    /**
+     * Card Types and Semantics
+     *  - Faction: group of people, gang, or clan
+     *  - Badge: badge, report, inform, block, apprehend
+     *  - Ticket: ticket, report, block, bill
+     */
+    const TYPES = {
+      FACTION: 'Faction',
+      BADGE: 'Badge',
+      TICKET: 'Ticket'
+    };
+
+    // Advantage matrix: who defeats whom thematically
+    const ADV = {
+      [TYPES.BADGE]: TYPES.FACTION,   // Badge apprehends Faction
+      [TYPES.TICKET]: TYPES.BADGE,    // Ticket overrules Badge with paperwork
+      [TYPES.FACTION]: TYPES.TICKET   // Faction ignores or overwhelms Ticket
+    };
+
+    // Base list of 25 cards with lightweight stats
+    // Power is 1..9 to allow simple comparison when types match
+    const BASE_CARDS = [
+      // 10 Faction themed
+      {name:'Street Collective', type:TYPES.FACTION, power:5},
+      {name:'Dockside Crew', type:TYPES.FACTION, power:4},
+      {name:'Market Syndicate', type:TYPES.FACTION, power:6},
+      {name:'Rooftop Runners', type:TYPES.FACTION, power:3},
+      {name:'Breaker Unit', type:TYPES.FACTION, power:7},
+      {name:'Night Circle', type:TYPES.FACTION, power:5},
+      {name:'Iron Band', type:TYPES.FACTION, power:8},
+      {name:'Shadow Choir', type:TYPES.FACTION, power:6},
+      {name:'Canal Watch', type:TYPES.FACTION, power:4},
+      {name:'Signal Knot', type:TYPES.FACTION, power:7},
+      // 8 Badge themed
+      {name:'City Inspector', type:TYPES.BADGE, power:5},
+      {name:'Marshal's Seal', type:TYPES.BADGE, power:6},
+      {name:'Audit Dossier', type:TYPES.BADGE, power:4},
+      {name:'Informant File', type:TYPES.BADGE, power:3},
+      {name:'Blockade Order', type:TYPES.BADGE, power:7},
+      {name:'Warrant Stamp', type:TYPES.BADGE, power:6},
+      {name:'Detain Protocol', type:TYPES.BADGE, power:5},
+      {name:'Blacklist Notice', type:TYPES.BADGE, power:4},
+      // 7 Ticket themed
+      {name:'Tariff Slip', type:TYPES.TICKET, power:3},
+      {name:'Summons Form', type:TYPES.TICKET, power:5},
+      {name:'Levy Bill', type:TYPES.TICKET, power:6},
+      {name:'Closure Citation', type:TYPES.TICKET, power:7},
+      {name:'Access Permit', type:TYPES.TICKET, power:4},
+      {name:'Fine Receipt', type:TYPES.TICKET, power:5},
+      {name:'Redline Notice', type:TYPES.TICKET, power:6}
+    ];
+
+    // Art generators produce lightweight SVG for each type and theme.
+    function artFaction(theme){
+      const fill = theme==='fantasy' ? '#7c3aed' : '#00c853';
+      const extra = theme==='fantasy' ? '<circle cx="72" cy="40" r="8" fill="#a78bfa" />' : '';
+      return `<svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Faction">
+        <rect x="8" y="8" width="104" height="104" rx="16" fill="${fill}" opacity="0.15" />
+        <g fill="${fill}">
+          <circle cx="36" cy="40" r="12"/>
+          <rect x="34" y="52" width="4" height="28" rx="2"/>
+          <rect x="24" y="60" width="24" height="4" rx="2"/>
+
+          <circle cx="72" cy="36" r="12"/>
+          <rect x="70" y="48" width="4" height="30" rx="2"/>
+          <rect x="60" y="58" width="24" height="4" rx="2"/>
+        </g>
+        ${extra}
+      </svg>`;
+    }
+    function artBadge(theme){
+      const fill = theme==='fantasy' ? '#f59e0b' : '#22c55e';
+      const ribbon = theme==='fantasy' ? '#fcd34d' : '#86efac';
+      return `<svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Badge">
+        <circle cx="60" cy="54" r="28" fill="${fill}" />
+        <path d="M42 84 L54 110 L60 100 L66 110 L78 84" fill="${ribbon}" />
+      </svg>`;
+    }
+    function artTicket(theme){
+      const fill = theme==='fantasy' ? '#60a5fa' : '#10b981';
+      return `<svg viewBox="0 0 120 120" width="100%" height="100%" aria-label="Ticket">
+        <g transform="rotate(-18 60 60)">
+          <rect x="28" y="28" width="64" height="64" rx="8" fill="${fill}" />
+          <line x1="36" y1="42" x2="84" y2="42" stroke="#ffffff" stroke-width="3" opacity=".7" />
+          <line x1="36" y1="54" x2="84" y2="54" stroke="#ffffff" stroke-width="3" opacity=".7" />
+        </g>
+      </svg>`;
+    }
+
+    function svgFor(type, theme){
+      if(type===TYPES.FACTION) return artFaction(theme);
+      if(type===TYPES.BADGE) return artBadge(theme);
+      return artTicket(theme);
+    }
+
+    // State
+    let deck = [];
+    let discard = [];
+    const players = [ {hand:[], score:0}, {hand:[], score:0} ];
+
+    // Utility
+    function log(msg){
+      const el = document.getElementById('log');
+      el.textContent += msg + "\n";
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function renderCards(containerId, cards){
+      const c = document.getElementById(containerId);
+      c.innerHTML = '';
+      cards.forEach((card)=>{
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `
+          <div class="art">${card.art}</div>
+          <div class="meta">
+            <div class="name">${card.name}</div>
+            <div class="tags">${card.type} • Power ${card.power}</div>
+          </div>`;
+        c.appendChild(el);
+      });
+    }
+
+    function renderAll(){
+      renderCards('deck', deck);
+      renderCards('discard', discard);
+      renderCards('hand1', players[0].hand);
+      renderCards('hand2', players[1].hand);
+    }
+
+    // Build a themed 25 card deck
+    function buildDeck(theme){
+      const list = BASE_CARDS.map((c, i)=>({ id:i+1, ...c, art: svgFor(c.type, theme) }));
+      return list;
+    }
+
+    // Fisher–Yates shuffle
+    function shuffleInPlace(arr){
+      for(let i = arr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Deal to two players. Player A receives 13, Player B receives 12 by default.
+    function dealTwo(){
+      players[0].hand = [];
+      players[1].hand = [];
+      let turn = 0;
+      while(deck.length){
+        const card = deck.shift();
+        players[turn].hand.push(card);
+        turn = 1 - turn;
+      }
+    }
+
+    // Determine winner between two cards according to advantage matrix and power
+    function compareCards(a, b){
+      if(ADV[a.type] === b.type && ADV[b.type] !== a.type) return 1; // a has type advantage
+      if(ADV[b.type] === a.type && ADV[a.type] !== b.type) return -1; // b has type advantage
+      if(a.type === b.type){
+        if(a.power > b.power) return 1;
+        if(b.power > a.power) return -1;
+        return 0;
+      }
+      // No advantage in either direction (should not occur with present matrix). Fallback to power.
+      if(a.power > b.power) return 1;
+      if(b.power > a.power) return -1;
+      return 0;
+    }
+
+    // Play one round: draw top of each hand, compare, award point, send both to discard
+    function playRound(){
+      if(players[0].hand.length === 0 || players[1].hand.length === 0){
+        log('No cards remain in one or both hands.');
+        return;
+      }
+      const a = players[0].hand.shift();
+      const b = players[1].hand.shift();
+      document.getElementById('bf1').innerHTML = '';
+      document.getElementById('bf2').innerHTML = '';
+      document.getElementById('bf1').appendChild(cardElement(a));
+      document.getElementById('bf2').appendChild(cardElement(b));
+
+      const cmp = compareCards(a, b);
+      if(cmp > 0){
+        players[0].score += 1;
+        log(`Player A wins the clash: ${a.name} (${a.type}, ${a.power}) defeats ${b.name} (${b.type}, ${b.power}).`);
+      } else if(cmp < 0){
+        players[1].score += 1;
+        log(`Player B wins the clash: ${b.name} (${b.type}, ${b.power}) defeats ${a.name} (${a.type}, ${a.power}).`);
+      } else {
+        log(`Tie: ${a.name} (${a.power}) equals ${b.name} (${b.power}). Both sent to discard.`);
+      }
+      discard.push(a, b);
+      renderAll();
+
+      if(players[0].hand.length === 0 && players[1].hand.length === 0){
+        const result = players[0].score === players[1].score ? 'Match is a draw.' : (players[0].score > players[1].score ? 'Player A wins the match.' : 'Player B wins the match.');
+        log(`Final Score — A: ${players[0].score}  B: ${players[1].score}. ${result}`);
+        document.getElementById('playRound').disabled = true;
+      }
+    }
+
+    function cardElement(card){
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `<div class="art">${card.art}</div><div class="meta"><div class="name">${card.name}</div><div class="tags">${card.type} • Power ${card.power}</div></div>`;
+      return el;
+    }
+
+    // Wire up controls
+    const makeBtn = document.getElementById('makeDeck');
+    const shuffleBtn = document.getElementById('shuffle');
+    const dealBtn = document.getElementById('deal');
+    const playBtn = document.getElementById('playRound');
+    const resetBtn = document.getElementById('reset');
+
+    makeBtn.addEventListener('click', ()=>{
+      const theme = document.getElementById('mode').value;
+      deck = buildDeck(theme);
+      discard = [];
+      players[0].hand = []; players[1].hand = []; players[0].score = 0; players[1].score = 0;
+      renderAll();
+      document.getElementById('bf1').innerHTML = '';
+      document.getElementById('bf2').innerHTML = '';
+      log(`Built a ${theme} themed deck of ${deck.length} cards.`);
+      shuffleBtn.disabled = false;
+      dealBtn.disabled = true;
+      playBtn.disabled = true;
+    });
+
+    shuffleBtn.addEventListener('click', ()=>{
+      shuffleInPlace(deck);
+      renderAll();
+      log('Deck has been shuffled.');
+      dealBtn.disabled = false;
+    });
+
+    dealBtn.addEventListener('click', ()=>{
+      dealTwo();
+      renderAll();
+      log(`Dealt cards. Player A has ${players[0].hand.length}. Player B has ${players[1].hand.length}.`);
+      playBtn.disabled = false;
+    });
+
+    playBtn.addEventListener('click', ()=>{
+      playRound();
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      deck = []; discard = []; players[0].hand = []; players[1].hand = []; players[0].score = 0; players[1].score = 0;
+      renderAll();
+      document.getElementById('bf1').innerHTML = '';
+      document.getElementById('bf2').innerHTML = '';
+      document.getElementById('log').textContent = '';
+      shuffleBtn.disabled = true; dealBtn.disabled = true; playBtn.disabled = true;
+      log('State has been cleared.');
+    });
+
+    // Build a default deck on load for convenience
+    window.addEventListener('DOMContentLoaded', ()=>{
+      document.getElementById('makeDeck').click();
+    });
+  </script>
+</body>
+</html>
