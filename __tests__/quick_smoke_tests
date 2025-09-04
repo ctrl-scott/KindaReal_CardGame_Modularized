@@ -1,0 +1,18 @@
+import { applySeed, rand, die, rpsThrow } from './rng.js';
+
+applySeed('abc');
+const seq1 = [rand(), rand(), rand()];
+applySeed('abc');
+const seq2 = [rand(), rand(), rand()];
+console.assert(seq1.join() === seq2.join(), 'same seed, same sequence');
+
+applySeed('abc');
+const d = Array.from({length:1000}, () => die());
+console.assert(d.every(x => x>=1 && x<=6), 'die() range');
+
+applySeed('shooter');
+const throws = Array.from({length:10}, () => rpsThrow());
+console.assert(throws.every(v => ['rock','paper','scissors'].includes(v)), 'rps domain');
+
+applySeed(''); // clear
+

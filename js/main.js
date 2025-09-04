@@ -17,7 +17,7 @@ import {
   closeRoundAlert,
   cardHTML
 } from './ui.js';
-import { applySeed } from './rng.js';
+//import { applySeed } from './rng.js';
 import { loadSettings, saveSettings, readSettingsFromDOM, writeSettingsToDOM } from './settings.js';
 
 // -------------------- Globals (UI helpers) --------------------

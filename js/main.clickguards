@@ -1,0 +1,505 @@
+// js/main.js
+
+// -------------------- Imports (must be first) --------------------
+import { players, deck, discard, bf, drewThisTurn, discardMode, resetAll } from './state.js';
+import { buildDeck } from './loader.js';
+import { makeArtContext, resolveArt } from './art.js';
+import { shuffleInPlace, compareWithRandomizers, BANK_ACTIONS } from './gameplay.js';
+import {
+  log,
+  renderAll,
+  renderHand,
+  renderStack,
+  updateScoreboard,
+  setTurnText,
+  updateTurnControls,
+  showRoundAlert,
+  closeRoundAlert,
+  cardHTML
+} from './ui.js';
+import { applySeed } from './rng.js';
+import { loadSettings, saveSettings, readSettingsFromDOM, writeSettingsToDOM } from './settings.js';
+
+// -------------------- Small helpers --------------------
+const $ = (id) => document.getElementById(id);
+const clampInt = (v) => (Number.isFinite(v) ? (v | 0) : 0);
+
+function enable(el, on) {
+  if (!el) return;
+  el.disabled = !on;
+  el.setAttribute('aria-disabled', String(!on));
+}
+
+// Throttle rapid clicks on the same control
+const CLICK_GAP_MS = 120; // small, feels snappy but prevents double-fire
+let lastClickAt = 0;
+function guardClick() {
+  const now = performance.now();
+  if (now - lastClickAt < CLICK_GAP_MS) return false;
+  lastClickAt = now;
+  return true;
+}
+
+// One-time event binder to avoid duplicate listeners on re-init
+const bound = new WeakMap();
+function onOnce(el, type, handler) {
+  if (!el) return;
+  const key = `${type}`;
+  const set = bound.get(el) ?? new Set();
+  if (set.has(key)) return; // already bound
+  el.addEventListener(type, handler);
+  set.add(key);
+  bound.set(el, set);
+}
+
+// -------------------- Global exposure used by templated HTML onclicks --------------------
+window.cardHTML = cardHTML; // used by battlefield renderers
+window.__handlers = window.__handlers || {};
+window.__getPlayTo = () => {
+  const v = $('playTo')?.value || 'none';
+  if (v === 'none') return null;
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : null;
+};
+
+// -------------------- Turn helpers --------------------
+window.__turn = null;                 // 0 = A, 1 = B, null = round over
+window.__discardMode = discardMode;   // reflect state singleton
+
+function reachedTarget(score, target) {
+  if (target === null) return false;
+  return target > 0 ? score >= target : score <= target;
+}
+function endRoundByTarget(winnerIdx, target) {
+  window.__turn = null;
+  setTurnText();
+  enable($('nextRound'), true);
+  enable($('resetScores'), true);
+  enable($('spendBank'), false);
+  const who = winnerIdx === 0 ? 'Player A' : 'Player B';
+  const msg = `Target reached (${target}). ${who} wins the round. BANK persists.`;
+  log(msg);
+  showRoundAlert(msg);
+}
+function checkPlayToEnd() {
+  const target = window.__getPlayTo();
+  if (target === null) return false;
+  const a = players[0].score, b = players[1].score;
+  if (reachedTarget(a, target) && reachedTarget(b, target)) { endRoundByTarget(a >= b ? 0 : 1, target); return true; }
+  if (reachedTarget(a, target)) { endRoundByTarget(0, target); return true; }
+  if (reachedTarget(b, target)) { endRoundByTarget(1, target); return true; }
+  return false;
+}
+
+function summarizeRoundAndEnd() {
+  const a = players[0].score, b = players[1].score;
+  const msg = (a > b)
+    ? `Round finished. Player A wins the round ${a} to ${b}. BANK persists.`
+    : (b > a)
+      ? `Round finished. Player B wins the round ${b} to ${a}. BANK persists.`
+      : `Round finished in a tie ${a} to ${b}. BANK persists.`;
+  log(msg);
+  window.__turn = null;
+  setTurnText();
+  return msg;
+}
+
+// -------------------- Draw / Discard --------------------
+function drawN(p, n) {
+  const count = clampInt(n);
+  if (count <= 0) return;
+  for (let k = 0; k < count; k++) {
+    if (deck.length === 0) { log('Deck is empty.'); break; }
+    const c = deck.shift();
+    if (c) players[p].hand.push(c);
+  }
+  renderHand(p);
+  renderStack('deck', deck);
+}
+
+function drawOneIfMyTurn(p) {
+  if (!guardClick()) return;
+  if (window.__turn !== p) { log('It is not your turn.'); return; }
+  if (drewThisTurn[p]) { log(`Player ${p === 0 ? 'A' : 'B'} already drew this turn.`); return; }
+  if (deck.length === 0) { log('Deck is empty.'); return; }
+  drawN(p, 1);
+  drewThisTurn[p] = true;
+  log(`Player ${p === 0 ? 'A' : 'B'} drew 1 card.`);
+  updateTurnControls();
+}
+
+function toggleDiscardMode(p) {
+  if (!guardClick()) return;
+  if (window.__turn !== p) { log('It is not your turn.'); return; }
+  if (bf[p] !== null) { log('You have already played to the battlefield.'); return; }
+  if (players[p].hand.length === 0) { log('Hand is empty.'); return; }
+  discardMode[p] = !discardMode[p];
+  log(`Discard mode ${discardMode[p] ? 'ON' : 'OFF'} for Player ${p === 0 ? 'A' : 'B'}.`);
+  updateTurnControls();
+  renderHand(p);
+}
+
+// -------------------- Core Play --------------------
+function playCard(playerIdx, handIndex) {
+  if (!guardClick()) return;
+
+  // Turn & bounds guards
+  if (window.__turn !== playerIdx) { log('It is not your turn.'); return; }
+  const hand = players[playerIdx].hand;
+  const idx = clampInt(handIndex);
+  if (idx < 0 || idx >= hand.length) { log('Invalid card index.'); return; }
+
+  // Extract the card
+  const card = hand.splice(idx, 1)[0];
+  if (!card) { log('Card not available.'); return; }
+
+  const opponent = 1 - playerIdx;
+  const bfId = playerIdx === 0 ? 'bf1' : 'bf2';
+
+  const applyBank = (targetIdx, delta) => {
+    const d = clampInt(delta);
+    if (d === 0) return;
+    if (d > 0) {
+      const before = players[targetIdx].bank;
+      players[targetIdx].bank = Math.max(0, before - d);
+      const red = before - players[targetIdx].bank;
+      log(`Bank impact on Player ${targetIdx === 0 ? 'A' : 'B'}: -${red} BANK.`);
+    } else {
+      players[targetIdx].bank += (-d);
+      log(`Bank boost for Player ${targetIdx === 0 ? 'A' : 'B'}: +${-d} BANK.`);
+    }
+  };
+  const pvpToggle = () => $('pvpEffects')?.checked;
+
+  // Apply effects
+  if (card.type === 'LifeEvent') {
+    if (card.target === 'self') {
+      const d = clampInt(card.scoreMod || 0);
+      players[playerIdx].score += d;
+      log(`Self-help: ${card.name} → Player ${playerIdx === 0 ? 'A' : 'B'} SCORE ${d >= 0 ? '+' : ''}${d}.`);
+      if (card.bankMod) applyBank(playerIdx, -card.bankMod);
+      discard.push(card);
+      if (checkPlayToEnd()) { renderAll(); return; }
+    } else if (card.target === 'opponent') {
+      const d = clampInt(card.scoreMod || 0);
+      players[opponent].score += d;
+      log(`Negative event: ${card.name} → Player ${opponent === 0 ? 'A' : 'B'} SCORE ${d}.`);
+      if (card.bankMod) applyBank(opponent, card.bankMod);
+      discard.push(card);
+      if (checkPlayToEnd()) { renderAll(); return; }
+    } else {
+      let d = clampInt(card.scoreMod || 0);
+      if (pvpToggle()) {
+        if (d > 0) d = -d;
+        players[opponent].score += d;
+        log(`PvP Life: ${card.name} → Player ${opponent === 0 ? 'A' : 'B'} SCORE ${d}.`);
+      } else {
+        players[playerIdx].score += d;
+        log(`Life: ${card.name} → Player ${playerIdx === 0 ? 'A' : 'B'} SCORE ${d >= 0 ? '+' : ''}${d}.`);
+      }
+      discard.push(card);
+      if (checkPlayToEnd()) { renderAll(); return; }
+    }
+  } else if (card.type === 'Economy') {
+    if (card.target === 'opponent') {
+      applyBank(opponent, card.bankMod || 0);
+      log(`Opponent economy: ${card.name} hits Player ${opponent === 0 ? 'A' : 'B'}.`);
+      discard.push(card);
+    } else if (card.target === 'self') {
+      applyBank(playerIdx, -(card.bankMod || 0));
+      log(`Self economy: ${card.name} boosts Player ${playerIdx === 0 ? 'A' : 'B'}.`);
+      discard.push(card);
+    } else {
+      const d = clampInt(card.bankMod || 0);
+      if (pvpToggle()) {
+        applyBank(opponent, d);
+        log(`PvP Economy: ${card.name} reduces Player ${opponent === 0 ? 'A' : 'B'} BANK by ${d}.`);
+      } else {
+        players[playerIdx].bank += d;
+        log(`Economy: ${card.name} increases Player ${playerIdx === 0 ? 'A' : 'B'} BANK by ${d}.`);
+      }
+      discard.push(card);
+    }
+  } else {
+    // Battlefield-type card; only 1 slot per player
+    if (bf[playerIdx]) {
+      log('You already have a card on the battlefield.');
+      // return it to hand to avoid loss
+      hand.splice(idx, 0, card);
+      renderHand(playerIdx);
+      return;
+    }
+    bf[playerIdx] = card;
+    const mount = $(bfId);
+    if (mount) {
+      mount.innerHTML = '';
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = cardHTML(card);
+      mount.appendChild(el);
+    }
+  }
+
+  // Advance turn
+  window.__turn = opponent;
+  drewThisTurn[window.__turn] = false;
+  setTurnText();
+
+  // Resolve clash if both sides have a card
+  if (bf[0] && bf[1]) {
+    const a = bf[0], bCard = bf[1];
+    const mode = $('rngMode')?.value || 'off';
+    const cmp = compareWithRandomizers(a, bCard, mode, log);
+    if (cmp > 0) { players[0].score += 1; log(`Clash: Player A wins (${a.name} vs ${bCard.name}).`); }
+    else if (cmp < 0) { players[1].score += 1; log(`Clash: Player B wins (${bCard.name} vs ${a.name}).`); }
+    else { log('Clash: tie.'); }
+
+    if (checkPlayToEnd()) {
+      discard.push(a, bCard);
+      bf[0] = bf[1] = null;
+      $('bf1') && ($('bf1').innerHTML = '');
+      $('bf2') && ($('bf2').innerHTML = '');
+      renderAll();
+      return;
+    }
+    discard.push(a, bCard);
+    bf[0] = bf[1] = null;
+    $('bf1') && ($('bf1').innerHTML = '');
+    $('bf2') && ($('bf2').innerHTML = '');
+  }
+
+  // End of round check
+  if (players[0].hand.length === 0 && players[1].hand.length === 0) {
+    const msg = summarizeRoundAndEnd();
+    showRoundAlert(msg);
+  }
+
+  updateScoreboard();
+  renderHand(0);
+  renderHand(1);
+  renderStack('discard', discard);
+}
+
+// Expose for templated inline handlers (if any custom buttons reference these)
+window.__handlers.playCard = playCard;
+window.__handlers.discardCard = function (playerIdx, handIndex) {
+  if (!guardClick()) return;
+  if (window.__turn !== playerIdx) { log('It is not your turn.'); return; }
+  const hand = players[playerIdx].hand;
+  const idx = clampInt(handIndex);
+  if (idx < 0 || idx >= hand.length) { log('Invalid card index.'); return; }
+  const card = hand.splice(idx, 1)[0];
+  if (!card) { log('Card not available.'); return; }
+
+  discard.push(card);
+  log(`Discard: Player ${playerIdx === 0 ? 'A' : 'B'} discarded ${card.name}.`);
+  discardMode[playerIdx] = false;
+  renderHand(playerIdx);
+  renderStack('discard', discard);
+  updateTurnControls();
+
+  window.__turn = 1 - playerIdx;
+  drewThisTurn[window.__turn] = false;
+  setTurnText();
+
+  if (players[0].hand.length === 0 && players[1].hand.length === 0) {
+    const msg = summarizeRoundAndEnd();
+    showRoundAlert(msg);
+  }
+};
+
+// -------------------- Bank Actions & Dealing --------------------
+function populateBankActions(actions) {
+  const sel = $('bankAction');
+  if (!sel) return;
+  sel.innerHTML = '';
+  actions.forEach(a => {
+    const o = document.createElement('option');
+    o.value = a.key;
+    o.textContent = a.name;
+    sel.appendChild(o);
+  });
+}
+
+function dealEightEach() {
+  if (deck.length < 16) { log('Not enough cards to deal.'); return; }
+  players[0].hand = [];
+  players[1].hand = [];
+  for (let i = 0; i < 16; i++) {
+    const card = deck.shift();
+    if (card) players[i % 2].hand.push(card);
+  }
+  bf[0] = bf[1] = null;
+  $('bf1') && ($('bf1').innerHTML = '');
+  $('bf2') && ($('bf2').innerHTML = '');
+
+  window.__turn = 0;
+  drewThisTurn[0] = drewThisTurn[1] = false;
+  discardMode[0] = discardMode[1] = false;
+
+  setTurnText();
+  enable($('nextRound'), true);
+  enable($('resetScores'), true);
+  enable($('spendBank'), true);
+  renderAll();
+}
+
+function resetScores() {
+  players[0].score = 0;
+  players[1].score = 0;
+  log('Scores reset.');
+  updateScoreboard();
+}
+
+function nextRound() {
+  const auto = $('autoReset')?.checked;
+  if (auto) { players[0].score = 0; players[1].score = 0; log('Auto reset scores.'); }
+  if (deck.length < 16) { log('Not enough cards for new round.'); return; }
+  dealEightEach();
+  log('New round started. Player A begins.');
+}
+
+// -------------------- Build & Art guardrails --------------------
+let buildToken = 0; // prevents overlapping builds from racing
+
+async function buildWithCurrentSettings() {
+  // Ignore if user is spamming clicks
+  if (!guardClick()) return;
+
+  const myToken = ++buildToken;
+  const s = readSettingsFromDOM();
+  saveSettings(s);
+
+  // Reset game state
+  resetAll(); // clears deck/discard/players/bf/drewThisTurn/etc.
+  $('bf1') && ($('bf1').innerHTML = '');
+  $('bf2') && ($('bf2').innerHTML = '');
+  window.__turn = null;
+  setTurnText();
+
+  renderAll();
+  enable($('shuffle'), false);
+  enable($('deal'), false);
+  enable($('nextRound'), false);
+  enable($('resetScores'), false);
+  enable($('spendBank'), false);
+ 
+  try {
+    const built = await buildDeck({
+      svgTheme: s.svgTheme,
+      imagePack: s.imagePack,
+      preferImages: s.preferImages
+    });
+
+    // If a newer build started, ignore these results
+    if (myToken !== buildToken) {
+      log('A newer build completed; discarding older result.');
+      return;
+    }
+
+    built.forEach((c) => deck.push(c));
+    renderAll();
+    log(
+      'Built a deck of ' + deck.length +
+      ' cards (svgTheme=' + s.svgTheme +
+      ', imagePack=' + s.imagePack +
+      ', preferImages=' + s.preferImages + ').'
+    );
+
+    // Enable post-build actions
+    enable($('shuffle'), true);
+    enable($('deal'), false);
+    enable($('nextRound'), false);
+    enable($('resetScores'), false);
+    enable($('spendBank'), false);
+
+  } catch (e) {
+    const msg = (e && e.message) ? e.message : String(e);
+    log('Build failed: ' + msg);
+  }
+
+function reskinArtInPlace() {
+  const s = readSettingsFromDOM();
+  saveSettings(s);
+  const ctx = makeArtContext(s);
+
+  const retag = (card) => {
+    if (!card) return;
+    const { html, meta } = resolveArt(card, ctx, card.id); // stable id keeps bg choice consistent
+    card.art = html;
+    card.__artMeta = meta;
+  };
+
+  [...deck, ...discard, ...players[0].hand, ...players[1].hand].forEach(retag);
+  if (bf[0]) retag(bf[0]);
+  if (bf[1]) retag(bf[1]);
+
+  renderAll();
+
+  // Battlefield mounts may not be covered by renderAll depending on your UI
+  if ($('bf1') && bf[0]) { $('bf1').innerHTML = ''; const el = document.createElement('div'); el.className = 'card'; el.innerHTML = cardHTML(bf[0]); $('bf1').appendChild(el); }
+  if ($('bf2') && bf[1]) { $('bf2').innerHTML = ''; const el = document.createElement('div'); el.className = 'card'; el.innerHTML = cardHTML(bf[1]); $('bf2').appendChild(el); }
+
+  log(`Re-skinned in place (svgTheme=${s.svgTheme}, imagePack=${s.imagePack}, preferImages=${s.preferImages}). State preserved.`);
+}
+
+// -------------------- Wire events (idempotent) --------------------
+function wireControls() {
+  onOnce($('makeDeck'), 'click', async () => { await buildWithCurrentSettings(); });
+  onOnce($('applyArt'), 'click', async () => { await buildWithCurrentSettings(); log('Applied art via rebuild.'); });
+  onOnce($('reskinArt'), 'click', () => { reskinArtInPlace(); });
+
+  onOnce($('shuffle'), 'click', () => { if (!guardClick()) return; shuffleInPlace(deck); renderAll(); log('Deck shuffled.'); enable($('deal'), true); });
+  onOnce($('deal'), 'click', () => {
+    if (!guardClick()) return;
+    if (window.__turn !== null) { log('A hand is already active.'); return; }
+    dealEightEach();
+    log(`Dealt 8 each. Player A has ${players[0].hand.length}. Player B has ${players[1].hand.length}. Player A starts.`);
+  });
+  onOnce($('nextRound'), 'click', () => { if (!guardClick()) return; nextRound(); });
+  onOnce($('resetScores'), 'click', () => { if (!guardClick()) return; resetScores(); });
+
+  onOnce($('spendBank'), 'click', () => {
+    if (!guardClick()) return;
+    if (window.__turn === null) { log('No active turn.'); return; }
+    const key = $('bankAction')?.value;
+    const action = BANK_ACTIONS.find(a => a.key === key);
+    const p = window.__turn;
+    if (!action) { log('No action selected.'); return; }
+    if (players[p].bank < action.cost) { log(`Player ${p === 0 ? 'A' : 'B'} lacks BANK.`); return; }
+    players[p].bank -= action.cost;
+    action.effect(p, drawN, players, updateScoreboard, checkPlayToEnd);
+    log(`Player ${p === 0 ? 'A' : 'B'} spent ${action.cost} BANK to ${action.name}.`);
+    updateScoreboard();
+  });
+
+  onOnce($('applySeed'), 'click', () => {
+    const seed = $('seedInput')?.value.trim();
+    applySeed(seed, log);
+  });
+
+  onOnce($('drawA'), 'click', () => drawOneIfMyTurn(0));
+  onOnce($('drawB'), 'click', () => drawOneIfMyTurn(1));
+  onOnce($('toggleDiscardA'), 'click', () => toggleDiscardMode(0));
+  onOnce($('toggleDiscardB'), 'click', () => toggleDiscardMode(1));
+  onOnce($('closeRoundModal'), 'click', closeRoundAlert);
+  onOnce($('roundModal'), 'click', (e) => { if (e.target.id === 'roundModal') closeRoundAlert(); });
+}
+
+// -------------------- App init (single-shot) --------------------
+function init() {
+  if (window.__APP?.inited) return;        // guard double init
+  window.__APP = { inited: true };
+
+  const s = loadSettings();
+  writeSettingsToDOM(s);
+  populateBankActions(BANK_ACTIONS);
+  wireControls();
+
+  // Kick off initial build using current settings
+  $('makeDeck')?.click();
+}
+
+window.addEventListener('DOMContentLoaded', init);
+});
+
