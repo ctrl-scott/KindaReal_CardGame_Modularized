@@ -1,0 +1,70 @@
+Great question!
+
+---
+
+# Code Page 437 (CP437)
+
+**Code Page 437**, also known as **IBM PC US** or **OEM-US**, was the **original character set** of the IBM PC introduced in 1981. It’s an **8-bit code page** (values 0–255) that extends standard ASCII (0–127) with **128 additional characters**.
+
+---
+
+## Key Features
+
+1. **ASCII-compatible base (0–127)**
+
+   * The first half of CP437 is standard 7-bit ASCII: letters A–Z, digits 0–9, punctuation, and control codes.
+
+2. **Box-drawing characters**
+
+   * Characters like ─, │, ┌, ┐, └, ┘ allowed programmers to draw tables, menus, and windows in **text mode applications**.
+
+3. **Block and shading characters**
+
+   * ░, ▒, ▓, █ enabled ASCII art and graphical effects (progress bars, logos, “ANSI art”).
+
+4. **Math and symbols**
+
+   * Includes characters like π, Σ, ±, ÷, √ for use in technical applications.
+
+5. **International letters**
+
+   * Contains accented characters for Western European languages (é, ñ, ö, ç, etc.).
+
+---
+
+## Why It Matters
+
+* **Text Mode UI**: Early MS-DOS programs relied on CP437 box-drawing characters to create user interfaces before GUIs were common.
+* **NFO and ANSI art**: Artists used CP437 extensively for bulletin board system (BBS) art in the 1980s and 1990s. Many `.NFO` files still use CP437 to this day.
+* **Legacy compatibility**: CP437 is still referenced in Unicode as the source of many symbols. For example, Unicode blocks like *Box Drawing* and *Block Elements* were created to preserve CP437 art.
+
+---
+
+## Example (Box-drawing demo in CP437)
+
+```
+╔══════════════════╗
+║   CP437 Rocks!   ║
+╚══════════════════╝
+```
+
+This is text only — drawn using CP437 characters.
+
+---
+
+## Relation to Unicode
+
+* Unicode incorporated all CP437 glyphs, so modern systems can display them (if the correct font is chosen).
+* For example:
+
+  * CP437 `0xB3` → Unicode U+2502 `│`
+  * CP437 `0xC4` → Unicode U+2500 `─`
+  * CP437 `0xDB` → Unicode U+2588 `█`
+
+---
+
+✅ **In short:** CP437 was the *“default alphabet”* of the original IBM PC, mixing letters, symbols, and line-drawing characters. It became the artistic toolkit for early computer users.
+
+---
+
+Would you like me to generate a **full CP437 reference table (0–255) with their Unicode equivalents** in Markdown so you can use it inside your NFO/Markdown viewer docs?

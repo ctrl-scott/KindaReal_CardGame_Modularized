@@ -1,0 +1,313 @@
+<!--https://chatgpt.com/share/68b9b69e-4014-800c-8fe0-00614280d480-->
+<!--Make sure that you appreciate (or dont) CP437 for this viewer - it is also documented in the ChatGPT convo.-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NFO + Markdown Viewer</title>
+  <style>
+    :root{
+      --bg: #0f172a; /* slate-900 */
+      --fg: #e2e8f0; /* slate-200 */
+      --muted: #94a3b8; /* slate-400 */
+      --accent: #22d3ee; /* cyan-400 */
+      --panel: #111827cc; /* semi */
+      --border: #334155; /* slate-700 */
+      --good: #10b981; /* emerald-500 */
+      --bad:  #ef4444; /* red-500 */
+    }
+    body{margin:0;background:var(--bg);color:var(--fg);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";}
+    .toolbar{position:sticky;top:0;display:flex;gap:.75rem;align-items:center;padding:.75rem 1rem;background:linear-gradient(180deg,var(--panel),transparent);backdrop-filter: blur(8px);border-bottom:1px solid var(--border);z-index: 10}
+    .toolbar h1{font-size:1rem;margin:0 1rem 0 0;letter-spacing:.04em;color:var(--muted)}
+    .toolbar input[type="file"]{display:none}
+    .btn{appearance:none;border:1px solid var(--border);background:#0b1222;color:var(--fg);padding:.4rem .7rem;border-radius:.6rem;cursor:pointer}
+    .btn:hover{border-color:#3b82f6}
+    .tog{display:inline-flex;gap:.5rem;align-items:center}
+    .tog input{accent-color: var(--accent)}
+    .main{display:grid;grid-template-columns: 260px 1fr;gap:1rem;padding:1rem;}
+    .panel{border:1px solid var(--border);border-radius:1rem;background:#0b1222;}
+    .side{padding:1rem;}
+    .kv{font-family: ui-monospace, SFMono-Regular, Menlo, monospace;font-size:.85rem;color:var(--muted)}
+    .kv dt{color:#a5b4fc;font-weight:600}
+    .kv dd{margin:0 0 .5rem 0}
+    .drop{border:2px dashed var(--border);border-radius:1rem;padding:1rem;text-align:center;color:var(--muted)}
+    .drop.drag{border-color:var(--accent);color:var(--fg)}
+    .tabs{display:flex;border-bottom:1px solid var(--border)}
+    .tab{padding:.6rem .9rem;cursor:pointer;border-bottom:2px solid transparent}
+    .tab.active{border-color: var(--accent);color:#a5f3fc}
+    .view{padding:1rem;}
+    .md{max-width: 78ch;}
+    .md h1,.md h2,.md h3,.md h4{line-height:1.2}
+    .md h1{font-size:1.8rem;margin:1.2rem 0 .8rem}
+    .md h2{font-size:1.4rem;margin:1rem 0 .6rem}
+    .md h3{font-size:1.1rem;margin:.8rem 0 .5rem}
+    .md p{line-height:1.6}
+    .md code{background:#0a0f1a;border:1px solid var(--border);padding:.05rem .35rem;border-radius:.4rem}
+    .md pre{background:#0a0f1a;border:1px solid var(--border);padding:.8rem;border-radius:.7rem;overflow:auto}
+    .md a{color:#7dd3fc;text-decoration-color:#155e75}
+    .md ul{padding-left:1.1rem}
+    .md li{margin:.2rem 0}
+    .split{display:grid;grid-template-columns: 1fr 1fr;gap:1rem}
+    .rawbox{white-space:pre;overflow:auto;border:1px solid var(--border);padding:1rem;border-radius:.7rem;background:#060a12;color:#a1a1aa}
+    .nfo-wrap{white-space:pre-wrap}
+    .nfo-nowrap{white-space:pre}
+    .nfo{font-family: "Perfect DOS VGA 437", "IBM VGA 8x16", "Lucida Console", "Courier New", ui-monospace, monospace; font-size: var(--nfoSize, 14px); line-height: 1.1;}
+    .footer{opacity:.6;text-align:center;padding:1rem}
+    .lbl{font-size:.8rem;color:var(--muted)}
+    .range{display:flex;gap:.5rem;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <h1>NFO + Markdown Viewer</h1>
+    <label class="btn" for="fileInput">Open File</label>
+    <input id="fileInput" type="file" accept=".nfo,.md,.markdown,.txt,.ansi,.ans" />
+
+    <div class="tog"><input id="wrapToggle" type="checkbox" checked><label for="wrapToggle" class="lbl">Wrap NFO</label></div>
+    <div class="range"><label for="sizeRange" class="lbl">NFO Font</label><input id="sizeRange" type="range" min="10" max="22" step="1" value="14"></div>
+    <button class="btn" id="copyBtn">Copy Visible</button>
+    <button class="btn" id="saveHtmlBtn">Download HTML</button>
+  </div>
+
+  <div class="main">
+    <aside class="panel side">
+      <div class="drop" id="drop">
+        Drop an .nfo or .md file here
+      </div>
+      <div style="height:1rem"></div>
+      <dl class="kv" id="meta"></dl>
+    </aside>
+
+    <section class="panel">
+      <div class="tabs">
+        <div class="tab active" data-tab="rendered">Rendered</div>
+        <div class="tab" data-tab="raw">Raw</div>
+      </div>
+      <div class="view" id="view">
+        <div id="rendered" class="md"></div>
+        <div id="raw" class="rawbox" style="display:none"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footer">Self‑contained viewer • Works offline • Drag & drop supported</div>
+
+<script>
+(function(){
+  const el = (id)=>document.getElementById(id);
+  const fileInput = el('fileInput');
+  const drop = el('drop');
+  const meta = el('meta');
+  const rendered = el('rendered');
+  const raw = el('raw');
+  const wrapToggle = el('wrapToggle');
+  const sizeRange = el('sizeRange');
+  const copyBtn = el('copyBtn');
+  const saveHtmlBtn = el('saveHtmlBtn');
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+
+  let current = { name: '', type: 'md', text: '', bytes: null };
+
+  // --- CP437 minimal mapping (commonly used art characters) ---
+  const CP437 = new Map([
+    [0xB0,'\u2591'],[0xB1,'\u2592'],[0xB2,'\u2593'],
+    [0xB3,'\u2502'],[0xB4,'\u2524'],[0xC4,'\u2500'],[0xC5,'\u253C'],
+    [0xDA,'\u250C'],[0xBF,'\u2510'],[0xC0,'\u2514'],[0xD9,'\u2518'],
+    [0xC3,'\u251C'],[0xB9,'\u2563'],[0xC2,'\u252C'],[0xC1,'\u2534'],
+    [0xCD,'\u2550'],[0xBA,'\u2551'],[0xC9,'\u2554'],[0xBB,'\u2557'],
+    [0xC8,'\u255A'],[0xBC,'\u255D'],[0xCC,'\u2560'],[0xCB,'\u2566'],
+    [0xCA,'\u2569'],[0xCE,'\u256C'],[0xDF,'\u2580'],[0xDC,'\u2584'],
+    [0xDB,'\u2588'],[0xDD,'\u258C'],[0xDE,'\u2590']
+  ]);
+  function decodeCP437(u8){
+    let out = '';
+    for (let i=0;i<u8.length;i++){
+      const b = u8[i];
+      if (b === 0x0D) continue; // ignore CR
+      if (b === 0x0A) { out += '\n'; continue; }
+      if (b >= 0x20 && b <= 0x7E){ out += String.fromCharCode(b); continue; }
+      const mapped = CP437.get(b);
+      if (mapped){ out += mapped; continue; }
+      // fallback to Unicode Latin-1 for some letters used in NFO tags
+      out += new TextDecoder('latin1').decode(new Uint8Array([b]));
+    }
+    return out;
+  }
+
+  // --- Minimal Markdown -> HTML (safe subset) ---
+  function escapeHtml(s){return s.replace(/[&<>"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+  function mdToHtml(md){
+    // Normalize line endings
+    md = md.replace(/\r\n?/g,'\n');
+
+    // Fenced code blocks
+    md = md.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (m,lang,code)=>{
+      return `<pre><code${lang?` class="language-${lang}"`:''}>${escapeHtml(code)}</code></pre>`;
+    });
+
+    // Inline code
+    md = md.replace(/`([^`]+)`/g, (m,code)=>`<code>${escapeHtml(code)}</code>`);
+
+    // Headings # to ######
+    md = md.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>')
+           .replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>')
+           .replace(/^####\s+(.+)$/gm, '<h4>$1</h4>')
+           .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+           .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+           .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+
+    // Blockquotes
+    md = md.replace(/^>\s?(.*)$/gm, '<blockquote>$1</blockquote>');
+
+    // Bold / Italic (simple)
+    md = md.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+           .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+    // Links [text](url)
+    md = md.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m,txt,url)=>`<a href="${url}" target="_blank" rel="noreferrer noopener">${txt}</a>`);
+
+    // Unordered lists
+    md = md.replace(/^(?:- |\* )(.*(?:\n(?:- |\* ).*)*)/gm, (m)=>{
+      const items = m.split(/\n/).map(x=>x.replace(/^(?:- |\* )/,'').trim()).filter(Boolean);
+      return `<ul>\n${items.map(it=>`<li>${it}</li>`).join('\n')}\n</ul>`;
+    });
+
+    // Ordered lists
+    md = md.replace(/^(?:\d+\. )(.*(?:\n(?:\d+\. ).*)*)/gm, (m)=>{
+      const items = m.split(/\n/).map(x=>x.replace(/^\d+\. /,'').trim()).filter(Boolean);
+      return `<ol>\n${items.map(it=>`<li>${it}</li>`).join('\n')}\n</ol>`;
+    });
+
+    // Paragraphs: wrap remaining text blocks not inside tags
+    const lines = md.split(/\n{2,}/).map(block=>{
+      const trimmed = block.trim();
+      if (!trimmed) return '';
+      if (/^\s*<(h\d|ul|ol|li|pre|blockquote|p|table|img|hr|code)/i.test(trimmed)) return trimmed;
+      return `<p>${trimmed.replace(/\n+/g,'<br>')}</p>`;
+    });
+
+    return lines.join('\n\n');
+  }
+
+  function guessType(name){
+    const ext = (name.split('.').pop()||'').toLowerCase();
+    if (['nfo','ans','ansi'].includes(ext)) return 'nfo';
+    if (['md','markdown'].includes(ext)) return 'md';
+    return 'md';
+  }
+
+  function bytesToText(arr){
+    // UTF-8 decode fallback
+    try { return new TextDecoder('utf-8', {fatal:false}).decode(arr); } catch { return '' }
+  }
+
+  function parseSauce(u8){
+    // Minimal SAUCE presence check within last 512 bytes
+    const tail = u8.slice(Math.max(0, u8.length - 512));
+    const s = bytesToText(tail);
+    const idx = s.lastIndexOf('SAUCE');
+    if (idx === -1) return null;
+    return { note: 'SAUCE metadata detected near EOF (display not fully parsed).'};
+  }
+
+  function render(){
+    meta.innerHTML = '';
+    raw.textContent = current.text;
+
+    tabs.forEach(t=>t.classList.remove('active'));
+    const activeTab = document.querySelector('.tab.active') || tabs[0];
+    activeTab.classList.add('active');
+    const showRendered = (activeTab.dataset.tab === 'rendered');
+    rendered.style.display = showRendered ? 'block' : 'none';
+    raw.style.display = showRendered ? 'none' : 'block';
+
+    const info = [
+      ['File', current.name || '(untitled)'],
+      ['Mode', current.type.toUpperCase()],
+      ['Bytes', current.bytes ? current.bytes.length.toLocaleString() : current.text.length.toLocaleString()],
+    ];
+
+    if (current.type === 'nfo'){
+      const cls = wrapToggle.checked ? 'nfo nfo-wrap' : 'nfo nfo-nowrap';
+      rendered.innerHTML = `<pre class="${cls}" id="nfoPre"></pre>`;
+      const pre = document.getElementById('nfoPre');
+      pre.textContent = current.text;
+      document.documentElement.style.setProperty('--nfoSize', sizeRange.value + 'px');
+
+      // SAUCE check
+      const sauce = current.bytes ? parseSauce(current.bytes) : null;
+      if (sauce) info.push(['Metadata', sauce.note]);
+    }
+    else {
+      rendered.classList.add('md');
+      rendered.innerHTML = mdToHtml(current.text);
+    }
+
+    // Meta output
+    const frag = document.createDocumentFragment();
+    for (const [k,v] of info){
+      const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; frag.append(dt,dd);
+    }
+    meta.appendChild(frag);
+  }
+
+  async function handleFile(file){
+    current.name = file.name;
+    current.type = guessType(file.name);
+    const buf = await file.arrayBuffer();
+    const u8 = new Uint8Array(buf);
+    current.bytes = u8;
+    if (current.type === 'nfo'){
+      current.text = decodeCP437(u8);
+    } else {
+      // try utf-8 -> fallback latin1
+      try { current.text = new TextDecoder('utf-8',{fatal:true}).decode(u8); }
+      catch { current.text = new TextDecoder('latin1').decode(u8); }
+    }
+    render();
+  }
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(evt=>drop.addEventListener(evt, e=>{e.preventDefault();drop.classList.add('drag');}));
+  ['dragleave','drop'].forEach(evt=>drop.addEventListener(evt, e=>{e.preventDefault();drop.classList.remove('drag');}));
+  drop.addEventListener('drop', (e)=>{ const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); });
+  fileInput.addEventListener('change', (e)=>{ const f = e.target.files?.[0]; if (f) handleFile(f); });
+
+  // Controls
+  wrapToggle.addEventListener('change', render);
+  sizeRange.addEventListener('input', ()=>{ document.documentElement.style.setProperty('--nfoSize', sizeRange.value + 'px'); });
+
+  tabs.forEach(t=>t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); t.classList.add('active'); render(); }));
+
+  copyBtn.addEventListener('click', async ()=>{
+    const visible = (document.querySelector('.tab.active').dataset.tab === 'rendered') ? rendered.innerText : raw.innerText;
+    try{ await navigator.clipboard.writeText(visible); toast('Copied to clipboard', true); }
+    catch{ toast('Clipboard failed', false); }
+  });
+
+  saveHtmlBtn.addEventListener('click', ()=>{
+    const title = current.name || 'untitled';
+    const content = `<!doctype html><html><meta charset="utf-8"><title>${escapeHtml(title)}</title><pre style="white-space:pre-wrap;font-family:ui-monospace,monospace">${escapeHtml(rendered.innerText)}</pre></html>`;
+    const blob = new Blob([content], {type:'text/html;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (title.replace(/\.[^.]+$/, '')) + '.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  function toast(msg, ok){
+    const t = document.createElement('div');
+    t.textContent = msg; t.style.position='fixed'; t.style.bottom='1rem'; t.style.right='1rem'; t.style.padding='.5rem .75rem'; t.style.border='1px solid var(--border)'; t.style.background='#0b1222'; t.style.borderRadius='.6rem'; t.style.color= ok? 'var(--good)':'var(--bad)'; t.style.zIndex=1000;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 1600);
+  }
+
+  // Initial demo content
+  current = { name: 'README.md', type:'md', text: '# Welcome\n\nDrop an **.nfo** to render CP437 art, or open a **.md** to see rich text.\n\n```\n# code fences supported\nconsole.log("hello");\n```\n\n- Drag & drop files\n- Toggle NFO wrapping\n- Adjust NFO font size\n- Raw/Rendered tabs', bytes: null };
+  render();
+})();
+</script>
+</body>
+</html>

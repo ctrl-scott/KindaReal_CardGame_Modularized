@@ -1,0 +1,97 @@
+Here’s a Markdown (`.md`) document that explains the **purpose and function** of your `test_rng.mjs` script. You can save it as `test_rng.md` alongside your script:
+
+---
+
+# `test_rng.mjs` – Random Number Generator Test Script
+
+## Overview
+
+The `test_rng.mjs` script is a **standalone Node.js test runner** designed to validate the behavior of the random number generation functions exported from [`rng.js`](./js/rng.js).
+
+Unlike a full testing framework (such as Jest or Mocha), this script is **minimal** and **self-contained**, providing direct console feedback (`PASS` / `FAIL`) for each check.
+
+---
+
+## Functions Under Test
+
+The script imports and validates the following functions:
+
+* **`die()`**
+  Simulates rolling a six-sided die, returning a number between `1` and `6`.
+
+* **`rpsThrow()`**
+  Generates a random throw for the game Rock-Paper-Scissors.
+  Valid results: `"rock"`, `"paper"`, `"scissors"`.
+
+* **`applySeed(seedStr, log)`**
+  Applies a seeded random number generator to ensure reproducible results.
+
+---
+
+## Test Structure
+
+The script defines **three main test sections**, each verifying a different aspect of the RNG functions.
+
+### 1. Test: `die()` Range
+
+* Runs `die()` **100 times**.
+* Verifies all outputs are integers in the range `[1, 6]`.
+* **Pass condition:** No out-of-range values encountered.
+
+### 2. Test: `rpsThrow()` Validity
+
+* Runs `rpsThrow()` **100 times**.
+* Verifies all outputs are within `{rock, paper, scissors}`.
+* **Pass condition:** No invalid results encountered.
+
+### 3. Test: `applySeed()` Reproducibility
+
+* Calls `applySeed("seed123")` and generates three die rolls (`seq1`).
+* Calls `applySeed("seed123")` again and generates another three die rolls (`seq2`).
+* **Pass condition:** `seq1` and `seq2` are identical (showing deterministic behavior).
+
+---
+
+## Example Output
+
+```text
+Running Test 1: die()
+PASS: die() within 1..6
+
+Running Test 2: rpsThrow()
+PASS: rpsThrow() values valid
+
+Running Test 3: applySeed()
+[LOG] seeded with seed123
+PASS: applySeed reproducible: [ 4, 2, 6 ]
+
+All tests complete.
+```
+
+If a function misbehaves, the script will log an error and show `FAIL`.
+
+---
+
+## Usage
+
+Run the script with Node.js:
+
+```bash
+node test_rng.mjs
+```
+
+Requirements:
+
+* Node.js 18+ (for native ES module support).
+* The `rng.js` file must use **ES module exports**.
+
+---
+
+## Notes
+
+* This script does not check for **statistical randomness** (e.g., distribution uniformity). It only checks **functional correctness** (valid ranges, deterministic seeding).
+* It can be extended to include timing, distribution, or stress tests if deeper verification is needed.
+
+---
+
+Would you like me to **expand this `.md` with appendices** explaining *how each function works internally* (from `rng.js`), almost like an API reference, or should it stay focused only on the testing script?
