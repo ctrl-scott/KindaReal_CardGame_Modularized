@@ -1,33 +1,170 @@
 [
-  {"name":"Public Defender","type":"Attorney","power":5,"bg": "./img/default_basecard.png"},
-  {"name":"Defense Attorney","type":"Attorney","power":6, "bg": "./img/default_basecard.png"},
-  {"name":"Civil Rights Lawyer","type":"Attorney","power":7, "bg": "./img/default_basecard.png"},
-
-  {"name":"Street Collective","type":"Faction","power":5,"bg": "./img/default_peoplebg.png"},
-  {"name":"Dockside Crew","type":"Faction","power":4,"bg": "./img/default_peoplebg.png"},
-  {"name":"Market Syndicate","type":"Faction","power":6,"bg": "./img/default_peoplebg.png"},
-  {"name":"Rooftop Runners","type":"Faction","power":3,"bg": "./img/default_peoplebg.png"},
-  {"name":"Breaker Unit","type":"Faction","power":7,"bg": "./img/default_peoplebg.png"},
-  {"name":"Night Circle","type":"Faction","power":5,"bg": "./img/default_peoplebg.png"},
-  {"name":"Iron Band","type":"Faction","power":8,"bg": "./img/default_peoplebg.png"},
-  {"name":"Shadow Choir","type":"Faction","power":6,"bg": "./img/default_peoplebg.png"},
-  {"name":"Canal Watch","type":"Faction","power":4,"bg": "./img/default_peoplebg.png"},
-  {"name":"Signal Knot","type":"Faction","power":7,"bg": "./img/default_peoplebg.png"},
-
-  {"name":"City Inspector","type":"Badge","power":5,"bg": "./img/default_scalesbg.png"},
-  {"name":"Marshal's Seal","type":"Badge","power":6,"bg": "./img/default_scalesbg.png"},
-  {"name":"Audit Dossier","type":"Badge","power":4,"bg": "./img/default_scalesbg.png"},
-  {"name":"Informant File","type":"Badge","power":3,"bg": "./img/default_scalesbg.png"},
-  {"name":"Blockade Order","type":"Badge","power":7,"bg": "./img/default_scalesbg.png"},
-  {"name":"Warrant Stamp","type":"Badge","power":6,"bg": "./img/default_scalesbg.png"},
-  {"name":"Detain Protocol","type":"Badge","power":5,"bg": "./img/default_scalesbg.png"},
-  {"name":"Blacklist Notice","type":"Badge","power":4,"bg": "./img/default_scalesbg.png"},
-
-  {"name":"Tariff Slip","type":"Ticket","power":3,"bg": "./img/default_scalesbg.png"},
-  {"name":"Summons Form","type":"Ticket","power":5,"bg": "./img/default_scalesbg.png"},
-  {"name":"Levy Bill","type":"Ticket","power":6,"bg": "./img/default_scalesbg.png"},
-  {"name":"Closure Citation","type":"Ticket","power":7,"bg": "./img/default_scalesbg.png"},
-  {"name":"Access Permit","type":"Ticket","power":4,"bg": "./img/default_scalesbg.png"},
-  {"name":"Fine Receipt","type":"Ticket","power":5,"bg": "./img/default_scalesbg.png"},
-  {"name":"Redline Notice","type":"Ticket","power":6,"bg": "./img/default_scalesbg.png"}
+  {
+    "name": "Public Defender",
+    "type": "Attorney",
+    "power": 5,
+    "bg": "./img/default_basecard.png"
+  },
+  {
+    "name": "Defense Attorney",
+    "type": "Attorney",
+    "power": 6,
+    "bg": "./img/default_basecard.png"
+  },
+  {
+    "name": "Civil Rights Lawyer",
+    "type": "Attorney",
+    "power": 7,
+    "bg": "./img/default_basecard.png"
+  },
+  {
+    "name": "Street Collective",
+    "type": "Faction",
+    "power": 5,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Dockside Crew",
+    "type": "Faction",
+    "power": 6,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Market Syndicate",
+    "type": "Faction",
+    "power": 6,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Rooftop Runners",
+    "type": "Faction",
+    "power": 3,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Breaker Unit",
+    "type": "Faction",
+    "power": 7,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Night Circle",
+    "type": "Faction",
+    "power": 5,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Iron Band",
+    "type": "Faction",
+    "power": 8,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Shadow Choir",
+    "type": "Faction",
+    "power": 6,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Canal Watch",
+    "type": "Faction",
+    "power": 4,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "Signal Knot",
+    "type": "Faction",
+    "power": 7,
+    "bg": "./img/default_peoplebg.png"
+  },
+  {
+    "name": "City Inspector",
+    "type": "Badge",
+    "power": 5,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Marshal's Seal",
+    "type": "Badge",
+    "power": 6,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Audit Dossier",
+    "type": "Badge",
+    "power": 4,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Informant File",
+    "type": "Badge",
+    "power": 3,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Blockade Order",
+    "type": "Badge",
+    "power": 7,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Warrant Stamp",
+    "type": "Badge",
+    "power": 6,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Detain Protocol",
+    "type": "Badge",
+    "power": 5,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Blacklist Notice",
+    "type": "Badge",
+    "power": 4,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Tariff Slip",
+    "type": "Ticket",
+    "power": 3,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Summons Form",
+    "type": "Ticket",
+    "power": 5,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Levy Bill",
+    "type": "Ticket",
+    "power": 6,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Closure Citation",
+    "type": "Ticket",
+    "power": 7,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Access Permit",
+    "type": "Ticket",
+    "power": 4,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Fine Receipt",
+    "type": "Ticket",
+    "power": 5,
+    "bg": "./img/default_scalesbg.png"
+  },
+  {
+    "name": "Redline Notice",
+    "type": "Ticket",
+    "power": 6,
+    "bg": "./img/default_scalesbg.png"
+  }
 ]

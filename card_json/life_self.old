@@ -11,14 +11,14 @@
     "scoreMod": 2,
     "copies": 2,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Exercise Routine",
     "scoreMod": 1,
     "copies": 3,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Sleep Hygiene",
@@ -32,49 +32,49 @@
     "scoreMod": 1,
     "copies": 3,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "New Skill Course",
     "scoreMod": 2,
     "copies": 2,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Stable Housing",
     "scoreMod": 2,
     "copies": 1,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Financial Counseling",
     "scoreMod": 1,
     "copies": 2,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Healthy Diet",
     "scoreMod": 1,
     "copies": 2,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Disclosure (Exculpatory)",
     "scoreMod": 2,
     "copies": 2,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "img/default_selfhelp.png"
   },
   {
     "name": "Constitutional Amendments (Protected Right)",
     "scoreMod": 2,
     "copies": 2,
     "target": "self",
-    "bg": "./img/default_selfhelp.png"
+    "bg": "default_selfhelp.png"
   },
   {
     "name": "Read Book",
@@ -84,13 +84,13 @@
     "bg": "./img/default_selfhelp.png"
   },
   {
-    "name": "Coercive Mandate",
+    "name": "Gay Conversion Therapy",
     "type": "LifeEvent",
     "target": "opponent",
     "power": 6,
     "scoreMod": -2,
     "bankMod": -3,
     "bg": "./default_gayconversion.png",
-    "copies": 1
+    "copies": 2
   }
 ]

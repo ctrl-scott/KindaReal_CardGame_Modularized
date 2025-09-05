@@ -1,0 +1,15 @@
+[
+  {"name":"Jail Time","scoreMod":-3,"copies":2,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Addiction","scoreMod":-2,"copies":2,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Recovery","scoreMod":3,"copies":2,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Divorce","scoreMod":-2,"copies":2,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Marriage","scoreMod":2,"copies":1,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Payment Due","scoreMod":-1,"copies":3,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Rent Due","scoreMod":-1,"copies":4,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Utilities Bill","scoreMod":-1,"copies":3,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Groceries","scoreMod":1,"copies":4,"bg":"/img/default_lifegeneric.png"},
+  {"name":"Child Born","scoreMod":2,"copies":1,"bg":"/img/default_lifegeneric.png"},
+  {"name":"College Tuition","scoreMod":-2,"copies":1,"bg":"/img/default_lifegeneric.png"},
+  {"name":"STD Testing","scoreMod":1,"copies":2,"bg":"/img/default_lifegeneric.png"},
+  {"name":"STD Treatment","scoreMod":2,"copies":2,"bg":"/img/default_lifegeneric.png"}
+]

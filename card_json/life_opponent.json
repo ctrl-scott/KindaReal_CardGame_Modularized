@@ -1,15 +1,80 @@
 [
-  {"name":"Lawsuit Filed","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Eviction Notice","scoreMod":-3,"copies":1,"target":"opponent"},
-  {"name":"License Suspended","scoreMod":-2,"copies":1,"target":"opponent"},
-  {"name":"Injury or Illness","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Probation Violation","scoreMod":-3,"copies":1,"target":"opponent"},
-  {"name":"Tax Lien","scoreMod":-2,"copies":1,"target":"opponent"},
-  {"name":"Workplace Write-Up","scoreMod":-1,"copies":2,"target":"opponent"},
-  {"name":"Debt Collector Calls","scoreMod":-1,"copies":2,"target":"opponent"},
-  {"name":"District Attorney","scoreMod":-1,"copies":2,"target":"opponent"},
-  {"name":"Charges","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Disclosure (Incriminating)","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Constitutional Amendments (Violation)","scoreMod":-2,"copies":2,"target":"opponent"},
-  {"name":"Discovery (Adversary/Opponent)","scoreMod":-2,"copies":2,"target":"opponent"}
+  {
+    "name": "Lawsuit Filed",
+    "scoreMod": -1,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Eviction Notice",
+    "scoreMod": -3,
+    "copies": 1,
+    "target": "opponent"
+  },
+  {
+    "name": "License Suspended",
+    "scoreMod": -2,
+    "copies": 1,
+    "target": "opponent"
+  },
+  {
+    "name": "Injury or Illness",
+    "scoreMod": -1,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Probation Violation",
+    "scoreMod": -3,
+    "copies": 1,
+    "target": "opponent"
+  },
+  {
+    "name": "Tax Lien",
+    "scoreMod": -2,
+    "copies": 1,
+    "target": "opponent"
+  },
+  {
+    "name": "Workplace Write-Up",
+    "scoreMod": -1,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Debt Collector Calls",
+    "scoreMod": -1,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "District Attorney",
+    "scoreMod": -1,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Charges",
+    "scoreMod": -1,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Disclosure (Incriminating)",
+    "scoreMod": -2,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Constitutional Amendments (Violation)",
+    "scoreMod": -2,
+    "copies": 2,
+    "target": "opponent"
+  },
+  {
+    "name": "Discovery (Adversary/Opponent)",
+    "scoreMod": -2,
+    "copies": 2,
+    "target": "opponent"
+  }
 ]

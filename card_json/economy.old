@@ -1,0 +1,6 @@
+[
+  {"name":"Get Job","scoreMod":1,"bankMod":2,"copies":2,"bg":"/img/default_oppoknock.png"},
+  {"name":"Get Job Bonus","scoreMod":1,"bankMod":3,"copies":2,"bg":"/img/default_oppoknock.png"},
+  {"name":"Commission Sale","scoreMod":1,"bankMod":4,"copies":2,"bg":"/img/default_oppoknock.png"},
+  {"name":"Opportunity Knocker","scoreMod":1,"bankMod":4,"copies":2,"bg":"/img/default_oppoknock.png"}
+]
