@@ -145,7 +145,7 @@ label.inline{
    width + aspect-ratio; height is computed. */
 .cards .card{
   width:220px;
-  aspect-ratio:2 / 3;
+ /* aspect-ratio:2 / 3 */;
 
   background:#fff;
   border:1.5px solid var(--border);
@@ -293,13 +293,13 @@ label.inline{
    Center deck panel: masonry option
    ========================= */
 .deckpanel .cards{
-  display:block;           /* column layout */
+ /* display:auto;*/           /* column layout */
   column-count:2;
   column-gap:16px;
   padding-bottom:4px;
 }
 .deckpanel .card{
-  width:auto;
+  width:220px;
   display:inline-block;
   break-inside:avoid;
   margin:0 0 12px;
